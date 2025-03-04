@@ -3,8 +3,6 @@
 #include <sys/types.h>
 #include <stdlib.h>
 
-#define PROC "/proc/"
-
 struct Flags {
         int per_process;
         int system_wide;
@@ -39,7 +37,9 @@ void parse_args(struct Flags* f, int argc, char** argv){
         }
         else{
             fprintf(stderr, "Error allocating memory for PID arguement.");
+            exit(1);
         }
+        index++;
     }
     for (; index < argc; index++){
         if (strcmp(argv[index], "--per-process") == 0){
@@ -68,6 +68,7 @@ void parse_args(struct Flags* f, int argc, char** argv){
 }
 
 void table_output(struct Flags* f){
+    printf("%s", f->PID);
     if (f->PID){
         char file_path[256];
         snprintf(file_path, sizeof(file_path), "/proc/%s/fd", f->PID);
