@@ -62,7 +62,7 @@ void parse_args(struct Flags* f, int argc, char** argv){
                 fprintf(stderr, "Error no value present after --threshold=X");
                 exit(1);
             }
-            f->threshold_int =  (int)strtol(argv[index][13], NULL, 10);
+            f->threshold_int =  (int)strtol(argv[index][12], NULL, 10);
         }
     }
 }
