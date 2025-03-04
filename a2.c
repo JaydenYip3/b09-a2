@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/types.h>
+#include <stdlib.h>
 
 #define PROC "/proc/"
 
@@ -25,7 +26,7 @@ void parse_args(struct Flags* f, int argc, char** argv){
 
     if (argc == 1){
         f->composite = 1;
-        return 1;
+        return;
     }
 
     int index = 1;
@@ -68,16 +69,16 @@ void parse_args(struct Flags* f, int argc, char** argv){
 
 void table_output(struct Flags* f){
     if (f->PID){
-        char *file_path[256];
-        snprintf(file_path, siezof(file_path), "/proc/%s/fd", f->PID);
+        char file_path[256];
+        snprintf(file_path, sizeof(file_path), "/proc/%s/fd", f->PID);
         FILE *fp = fopen(file_path, "r");
         if (fp == NULL){
             fprintf(stderr, "File with PID: %s not found.", f->PID);
             exit(1);
         }
-        char *line[256];
+        char line[256];
         while (fgets(line, sizeof(line), fp)){
-            printf(line);
+            printf("%s",line);
         }
     }
 
@@ -105,7 +106,7 @@ void table_output(struct Flags* f){
 
     }
 
-    return 1;
+    return;
 }
 
 int main(int argc, char** argv){
