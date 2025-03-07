@@ -2,6 +2,8 @@
 #include <string.h>
 #include <sys/types.h>
 #include <stdlib.h>
+#include <dirent.h>
+
 
 struct Flags {
         int per_process;
@@ -29,6 +31,13 @@ void parse_args(struct Flags* f, int argc, char** argv){
 
     int index = 1;
     if (argv[index][0] != '-'){
+        char file_path[256];
+        snprintf(file_path, sizeof(file_path), "/proc/%s/fd", f->PID);
+        DIR *fd_path = opendir(file_path);
+        if (fd_path == NULL){
+            fprintf(stderr, "No such process with PID: %s.", f->PID);
+            exit(1);
+        }
         int len = strlen(argv[index]);
         f->PID = malloc(len + 1);
         if (f->PID){
@@ -69,23 +78,17 @@ void parse_args(struct Flags* f, int argc, char** argv){
 
 void table_output(struct Flags* f){
     printf("%s", f->PID);
+    struct dirent *entry;
+    DIR *fd_path;
     if (f->PID){
         char file_path[256];
         snprintf(file_path, sizeof(file_path), "/proc/%s/fd", f->PID);
-        FILE *fp = fopen(file_path, "r");
-        if (fp == NULL){
-            fprintf(stderr, "File with PID: %s not found.", f->PID);
-            exit(1);
-        }
-        char line[256];
-        while (fgets(line, sizeof(line), fp)){
-            printf("%s",line);
-        }
+        fd_path = opendir(file_path);
     }
-
 
     if (f->per_process){
         if (f->PID){
+
         }
         else{
         }
