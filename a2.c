@@ -46,7 +46,7 @@ void parse_args(struct Flags* f, int argc, char** argv){
         snprintf(file_path, sizeof(file_path), "/proc/%s/fd", f->PID);
         DIR *fd_path = opendir(file_path);
         if (fd_path == NULL){
-            fprintf(stderr, "No such process with PID: %s.", f->PID);
+            fprintf(stderr, "No such process with PID: %s.\n", f->PID);
             exit(1);
         }
         index++;
@@ -89,7 +89,11 @@ void table_output(struct Flags* f){
 
     if (f->per_process){
         if (f->PID){
-
+            printf("PID     FD");
+            printf("==========");
+            while ((entry = readdir(fd_path))  != NULL){
+                printf("%.7s %s", f->PID, entry->d_name);
+            }
         }
         else{
         }
