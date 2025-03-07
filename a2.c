@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <dirent.h>
 #include <sys/stat.h>
-
+#include <unistd.h>
 
 struct Flags {
         int per_process;
