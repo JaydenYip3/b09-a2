@@ -127,7 +127,7 @@ void table_output(struct Flags* f){
         }
         else{
             while ((entry = readdir(proc_dir))){
-                char PID[256];
+                char PID[20];
                 snprintf(PID, sizeof(PID), "%s", entry->d_name);
 
                 if (!isdigit(PID[0])){
