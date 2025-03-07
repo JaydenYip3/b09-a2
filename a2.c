@@ -141,6 +141,7 @@ void table_output(struct Flags* f){
 
                     if (!fd_path){
                         fprintf(stderr, "error with file directory path.");
+                        continue;
                     }
                     while ((fd_entry = readdir(fd_path)) != NULL){
                         if (strcmp(fd_entry->d_name, ".") == 0 || strcmp(fd_entry->d_name, "..") == 0) {
