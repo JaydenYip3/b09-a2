@@ -122,6 +122,9 @@ void table_output(struct Flags* f){
         printf("==========\n");
         if (f->PID){
             while ((fd_entry = readdir(fd_path))  != NULL){
+                if (strcmp(fd_entry->d_name, ".") == 0 || strcmp(fd_entry->d_name, "..") == 0) {
+                    continue;
+                }
                 printf("%.7s %s\n", f->PID, fd_entry->d_name);
             }
         }
@@ -140,7 +143,7 @@ void table_output(struct Flags* f){
                     fd_path = opendir(file_path);
 
                     if (!fd_path){
-                        fprintf(stderr, "error with file directory path.");
+                        //error accessing the path as a safety check
                         continue;
                     }
                     while ((fd_entry = readdir(fd_path)) != NULL){
@@ -158,7 +161,56 @@ void table_output(struct Flags* f){
 
     }
     if (f->system_wide){
+        printf("PID     FD     Filename\n");
+        printf("========================\n");
+        if (f->PID){
+            while ((fd_entry = readdir(fd_path))  != NULL){
+                if (strcmp(fd_entry->d_name, ".") == 0 || strcmp(fd_entry->d_name, "..") == 0) {
+                    continue;
+                }
+                char fd_filename[1024];
+                char fd_entry_link[256];
+                snprintf(fd_entry_link, sizeof(fd_entry_link), "proc/%s/fd/%s", f->PID, fd_entry->d_name);
+                int length = readlink(fd_entry_link, fd_filename, sizeof(fd_filename) - 1);
+                if (length == -1){
+                    printf("%.7s %s\n", f->PID, fd_entry->d_name);
+                }
+                else{
+                    fd_filename[length] = '\0';
+                    printf("%.7s %s %s\n", f->PID, fd_entry->d_name, fd_filename);
+                }
+            }
+        }
+        else{
+            while ((entry = readdir(proc_dir))){
+                char PID[20];
+                snprintf(PID, sizeof(PID), "%.9s", entry->d_name);
 
+                if (!isdigit(PID[0])){
+                    continue;
+                }
+
+                if (owns_file(PID)){
+                    char file_path[256];
+                    snprintf(file_path, sizeof(file_path), "/proc/%s/fd", PID);
+                    fd_path = opendir(file_path);
+
+                    if (!fd_path){
+                        //error accessing the path as a safety check
+                        continue;
+                    }
+                    while ((fd_entry = readdir(fd_path)) != NULL){
+                        if (strcmp(fd_entry->d_name, ".") == 0 || strcmp(fd_entry->d_name, "..") == 0) {
+                           continue;
+                        }
+                        printf("%.7s %s\n", PID, fd_entry->d_name);
+                    }
+                    closedir(fd_path);
+                }
+
+
+            }
+        }
     }
     if (f->Vnodes){
 
