@@ -31,13 +31,7 @@ void parse_args(struct Flags* f, int argc, char** argv){
 
     int index = 1;
     if (argv[index][0] != '-'){
-        char file_path[256];
-        snprintf(file_path, sizeof(file_path), "/proc/%s/fd", f->PID);
-        DIR *fd_path = opendir(file_path);
-        if (fd_path == NULL){
-            fprintf(stderr, "No such process with PID: %s.", f->PID);
-            exit(1);
-        }
+
         int len = strlen(argv[index]);
         f->PID = malloc(len + 1);
         if (f->PID){
@@ -46,6 +40,13 @@ void parse_args(struct Flags* f, int argc, char** argv){
         }
         else{
             fprintf(stderr, "Error allocating memory for PID arguement.");
+            exit(1);
+        }
+        char file_path[256];
+        snprintf(file_path, sizeof(file_path), "/proc/%s/fd", f->PID);
+        DIR *fd_path = opendir(file_path);
+        if (fd_path == NULL){
+            fprintf(stderr, "No such process with PID: %s.", f->PID);
             exit(1);
         }
         index++;
