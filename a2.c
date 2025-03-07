@@ -3,6 +3,7 @@
 #include <sys/types.h>
 #include <stdlib.h>
 #include <dirent.h>
+#include <sys/stat.h>
 
 
 struct Flags {
@@ -14,7 +15,18 @@ struct Flags {
         int threshold_int;
         char* PID;
     };
+int owns_file(char *PID){
+    char *path[64];
+    struct stat st;
 
+    snprintf(path, sizeof(path), "/proc/%s", PID);
+
+    if (stat(path, &st) != 0){
+        return 0;
+    }
+    return st.st_uid == getuid();
+
+}
 void parse_args(struct Flags* f, int argc, char** argv){
     f->per_process = 0;
     f->system_wide = 0;
@@ -46,6 +58,9 @@ void parse_args(struct Flags* f, int argc, char** argv){
         snprintf(file_path, sizeof(file_path), "/proc/%s/fd", f->PID);
         DIR *fd_path = opendir(file_path);
         if (fd_path == NULL){
+            if (!owns_file(f->PID)){
+                fprintf(stderr, "You do not have permissions for PID:  %s.\n", f->PID);
+            }
             fprintf( stderr, "No such process with PID: %s.\n", f->PID);
             free(f->PID);
             exit(1);
