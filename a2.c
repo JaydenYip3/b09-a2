@@ -128,8 +128,7 @@ void table_output(struct Flags* f){
         else{
             while ((entry = readdir(proc_dir))){
                 char PID[256];
-                strncpy(PID, entry->d_name, sizeof(PID) - 1);
-                PID[sizeof(PID) - 1] = '\0';
+                snprintf(PID, sizeof(PID), "%s", entry->d_name);
 
                 if (!isdigit(PID[0])){
                     continue;
@@ -142,7 +141,7 @@ void table_output(struct Flags* f){
                     while ((fd_entry = readdir(fd_path)) != NULL){
                         printf("%.7s %s\n", PID, fd_entry->d_name);
                     }
-                    closedir(file_path);
+                    closedir(fd_path);
                 }
 
 
