@@ -46,9 +46,11 @@ void parse_args(struct Flags* f, int argc, char** argv){
         snprintf(file_path, sizeof(file_path), "/proc/%s/fd", f->PID);
         DIR *fd_path = opendir(file_path);
         if (fd_path == NULL){
-            fprintf(stderr, "No such process with PID: %s.\n", f->PID);
+            fprintf( stderr, "No such process with PID: %s.\n", f->PID);
+            free(f->PID);
             exit(1);
         }
+        printf("Successfully opened %s\n", file_path);
         index++;
     }
     for (; index < argc; index++){
