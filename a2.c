@@ -99,6 +99,7 @@ void parse_args(struct Flags* f, int argc, char** argv){
 void table_output(struct Flags* f){
     //printf("%s", f->PID);
     struct dirent *entry;
+    struct dirent *fd_entry;
     DIR *fd_path;
     if (f->PID){
         char file_path[256];
@@ -107,14 +108,29 @@ void table_output(struct Flags* f){
     }
 
     if (f->per_process){
+        printf("PID     FD\n");
+        printf("==========\n");
         if (f->PID){
-            printf("PID     FD\n");
-            printf("==========\n");
-            while ((entry = readdir(fd_path))  != NULL){
-                printf("%.7s %s\n", f->PID, entry->d_name);
+            while ((fd_entry = readdir(fd_path))  != NULL){
+                printf("%.7s %s\n", f->PID, fd_entry->d_name);
             }
         }
         else{
+            while ((entry = readdir("/proc"))){
+                char PID[256];
+                strncpy(PID, entry->d_name, sizeof(PID) - 1);
+                PID[sizeof(PID) - 1] = '\0';
+
+                if (owns_file(PID)){
+                    char file_path[256];
+                    snprintf(file_path, sizeof(file_path), "/proc/%s/fd", PID);
+                    while ((fd_entry = readdir(file_path)) != NULL){
+                        printf("%.7s %s\n", PID, fd_entry->d_name);
+                    }
+                }
+
+
+            }
         }
 
     }
