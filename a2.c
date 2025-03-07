@@ -16,7 +16,7 @@ struct Flags {
         char* PID;
     };
 int owns_file(char *PID){
-    char *path[64];
+    char path[64];
     struct stat st;
 
     snprintf(path, sizeof(path), "/proc/%s", PID);
