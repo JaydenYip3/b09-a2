@@ -97,7 +97,7 @@ void parse_args(struct Flags* f, int argc, char** argv){
 }
 
 void table_output(struct Flags* f){
-    printf("%s", f->PID);
+    //printf("%s", f->PID);
     struct dirent *entry;
     DIR *fd_path;
     if (f->PID){
@@ -108,10 +108,10 @@ void table_output(struct Flags* f){
 
     if (f->per_process){
         if (f->PID){
-            printf("PID     FD");
-            printf("==========");
+            printf("PID     FD\n");
+            printf("==========\n");
             while ((entry = readdir(fd_path))  != NULL){
-                printf("%.7s %s", f->PID, entry->d_name);
+                printf("%.7s %s\n", f->PID, entry->d_name);
             }
         }
         else{
