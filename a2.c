@@ -116,10 +116,15 @@ void table_output(struct Flags* f){
             }
         }
         else{
+            fd_path = opendir("/proc");
             while ((entry = readdir("/proc"))){
                 char PID[256];
                 strncpy(PID, entry->d_name, sizeof(PID) - 1);
                 PID[sizeof(PID) - 1] = '\0';
+
+                if (!isdigit(PID[0])){
+                    continue;
+                }
 
                 if (owns_file(PID)){
                     char file_path[256];
