@@ -205,14 +205,14 @@ void table_output(struct Flags* f){
                         }
                         char fd_filename[1024];
                         char fd_entry_link[512]; //this might be bad...
-                        snprintf(fd_entry_link, sizeof(fd_entry_link), "/proc/%.9s/fd/%s", f->PID, fd_entry->d_name);
+                        snprintf(fd_entry_link, sizeof(fd_entry_link), "/proc/%.9s/fd/%s", PID, fd_entry->d_name);
                         ssize_t length = readlink(fd_entry_link, fd_filename, sizeof(fd_filename) - 1);
                         if (length == -1){
-                            printf("%.7s %s\n", f->PID, fd_entry->d_name);
+                            printf("%.7s %s\n",PID, fd_entry->d_name);
                         }
                         else{
                             fd_filename[length] = '\0';
-                            printf("%.7s %s %s\n", f->PID, fd_entry->d_name, fd_filename);
+                            printf("%.7s %s %s\n", PID, fd_entry->d_name, fd_filename);
                         }
                     }
                     closedir(fd_path);
