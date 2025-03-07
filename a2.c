@@ -128,7 +128,7 @@ void table_output(struct Flags* f){
         else{
             while ((entry = readdir(proc_dir))){
                 char PID[20];
-                snprintf(PID, sizeof(PID), "%s", entry->d_name);
+                snprintf(PID, sizeof(PID), "%.9s", entry->d_name);
 
                 if (!isdigit(PID[0])){
                     continue;
@@ -136,7 +136,7 @@ void table_output(struct Flags* f){
 
                 if (owns_file(PID)){
                     char file_path[256];
-                    snprintf(file_path, sizeof(file_path), "/proc/%.9s/fd", PID);
+                    snprintf(file_path, sizeof(file_path), "/proc/%s/fd", PID);
                     fd_path = opendir(file_path);
                     while ((fd_entry = readdir(fd_path)) != NULL){
                         printf("%.7s %s\n", PID, fd_entry->d_name);
