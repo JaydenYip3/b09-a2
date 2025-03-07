@@ -138,7 +138,14 @@ void table_output(struct Flags* f){
                     char file_path[256];
                     snprintf(file_path, sizeof(file_path), "/proc/%s/fd", PID);
                     fd_path = opendir(file_path);
+
+                    if (!fd_path){
+                        fprintf(stderr, "error with file directory path.");
+                    }
                     while ((fd_entry = readdir(fd_path)) != NULL){
+                        if (strcmp(fd_entry->d_name, ".") == 0 || strcmp(fd_entry->d_name, "..") == 0) {
+                           continue;
+                        }
                         printf("%.7s %s\n", PID, fd_entry->d_name);
                     }
                     closedir(fd_path);
