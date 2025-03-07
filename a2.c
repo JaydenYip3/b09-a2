@@ -60,12 +60,14 @@ void parse_args(struct Flags* f, int argc, char** argv){
         if (fd_path == NULL){
             if (!owns_file(f->PID)){
                 fprintf(stderr, "You do not have permissions for PID:  %s.\n", f->PID);
+                free(f->PID);
+                exit(1);
             }
             fprintf( stderr, "No such process with PID: %s.\n", f->PID);
             free(f->PID);
             exit(1);
         }
-        printf("Successfully opened %s\n", file_path);
+        //printf("opened %s\n", file_path);
         index++;
     }
     for (; index < argc; index++){
@@ -141,6 +143,7 @@ int main(int argc, char** argv){
 
     Flags input_flags;
     parse_args(&input_flags, argc, argv);
+    table_output(&input_flags);
 
 
 
