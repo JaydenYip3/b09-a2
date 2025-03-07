@@ -170,7 +170,7 @@ void table_output(struct Flags* f){
                 }
                 char fd_filename[1024];
                 char fd_entry_link[256];
-                snprintf(fd_entry_link, sizeof(fd_entry_link), "proc/%s/fd/%s", f->PID, fd_entry->d_name);
+                snprintf(fd_entry_link, sizeof(fd_entry_link), "proc/%.9s/fd/%s", f->PID, fd_entry->d_name);
                 int length = readlink(fd_entry_link, fd_filename, sizeof(fd_filename) - 1);
                 if (length == -1){
                     printf("%.7s %s\n", f->PID, fd_entry->d_name);
