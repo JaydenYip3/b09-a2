@@ -102,10 +102,19 @@ void table_output(struct Flags* f){
     struct dirent *entry;
     struct dirent *fd_entry;
     DIR *fd_path;
+    DIR *proc_dir = opendir("/proc");
+    if (!proc_dir){
+        fprintf(stderr, "Erorr in opening '/proc' directory.");
+        exit(1);
+    }
     if (f->PID){
         char file_path[256];
         snprintf(file_path, sizeof(file_path), "/proc/%s/fd", f->PID);
         fd_path = opendir(file_path);
+        if (!fd_path){
+            fprintf(stderr, "Erorin opening path: %s", file_path);
+            exit(1);
+        }
     }
 
     if (f->per_process){
@@ -117,8 +126,7 @@ void table_output(struct Flags* f){
             }
         }
         else{
-            fd_path = opendir("/proc");
-            while ((entry = readdir(fd_path))){
+            while ((entry = readdir(proc_dir))){
                 char PID[256];
                 strncpy(PID, entry->d_name, sizeof(PID) - 1);
                 PID[sizeof(PID) - 1] = '\0';
@@ -130,9 +138,11 @@ void table_output(struct Flags* f){
                 if (owns_file(PID)){
                     char file_path[256];
                     snprintf(file_path, sizeof(file_path), "/proc/%s/fd", PID);
-                    while ((fd_entry = readdir(file_path)) != NULL){
+                    fd_path = opendir(file_path);
+                    while ((fd_entry = readdir(fd_path)) != NULL){
                         printf("%.7s %s\n", PID, fd_entry->d_name);
                     }
+                    closedir(file_path);
                 }
 
 
