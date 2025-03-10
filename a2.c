@@ -16,6 +16,67 @@ struct Flags {
         int threshold_int;
         char* PID;
     };
+
+typedef struct Node {
+    int fd;
+    int inode;
+    struct Node *next;
+} Node;
+
+Node * createNode(int fd){
+    Node *new_node = (Node*)malloc(sizeof(Node));
+    new_node->fd = fd;
+    struct stat fd_stat;
+    if (fstat(fd, &fd_stat) < 0) {
+        //fprintf(stderr, "Error retrieving inode");
+        return;
+    }
+    new_node->inode = (int)fd_stat.st_ino;
+    new_node->next = NULL;
+
+    return new_node;
+
+}
+
+int contains_fd(Node *head, int fd){
+    Node *current = head;
+
+    while (current != NULL){
+        current = current->next;
+        if (current->fd == fd){
+            return 1;
+        }
+    }
+    return 0;
+}
+
+Node* add_fd(Node *head, int fd){
+    if (contains_fd(head, fd)){
+        return head;
+    }
+    Node *new_node = createNode(fd);
+    if (head ==NULL || head->fd > fd){
+        new_node->next = head;
+        return new_node;
+    }
+    Node *current = head;
+    while (current->next != NULL && current->next->fd < fd){
+        current = current->next;
+    }
+
+    new_node->next = current->next;
+    current->next = new_node->next;
+    return head;
+}
+
+void free_fd(Node *head){
+    Node *current = head;
+    while (current != NULL){
+        Node *next = current->next;
+        free(current);
+        current = next;
+    }
+}
 int owns_file(char *PID){
     char path[64];
     struct stat st;
@@ -161,9 +222,6 @@ void table_output(struct Flags* f){
 
     }
     if (f->system_wide){
-         if (fd_path){
-            rewinddir(fd_path);
-        }
         if (proc_dir){
             rewinddir(proc_dir);
         }
@@ -238,22 +296,23 @@ void table_output(struct Flags* f){
         printf("FD     Inode\n");
         printf("============\n");
         if (f->PID){
+            Node *head = NULL;
             while ((fd_entry = readdir(fd_path))  != NULL){
                 if (strcmp(fd_entry->d_name, ".") == 0 || strcmp(fd_entry->d_name, "..") == 0) {
                     continue;
                 }
-                struct stat fd_stat;
                 int fd = (int) strtol(fd_entry->d_name, NULL, 10);
+                head = add_fd(head, fd);
 
-                if (fstat(fd, &fd_stat) < 0) {
-                    //fprintf(stderr, "Error retrieving inode");
-                    continue;
-                }
-
-                printf("%s %d\n", fd_entry->d_name, (int)fd_stat.st_ino);
             }
+            Node *print_nodes = head;
+            while (print_nodes != NULL){
+                printf("%d      %d", print_nodes->fd, print_nodes->inode);
+            }
+            free_fd(head);
         }
         else{
+            Node *head = NULL;
             while ((entry = readdir(proc_dir))){
                 char PID[20];
                 snprintf(PID, sizeof(PID), "%.9s", entry->d_name);
@@ -273,18 +332,17 @@ void table_output(struct Flags* f){
                         if (strcmp(fd_entry->d_name, ".") == 0 || strcmp(fd_entry->d_name, "..") == 0) {
                             continue;
                         }
-                        struct stat fd_stat;
                         int fd = (int) strtol(fd_entry->d_name, NULL, 10);
-                        if (fstat(fd, &fd_stat) < 0) {
-                            //fprintf(stderr, "Error retrieving inode");
-                            continue;
-                        }
-
-                        printf("%s %d\n", fd_entry->d_name, (int)fd_stat.st_ino);
+                        head = add_fd(head, fd);
                     }
                     closedir(fd_path);
                 }
             }
+            Node *print_nodes = head;
+            while (print_nodes != NULL){
+                printf("%d      %d", print_nodes->fd, print_nodes->inode);
+            }
+            free_fd(head);
 
          }
     }
