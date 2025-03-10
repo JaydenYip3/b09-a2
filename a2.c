@@ -161,7 +161,7 @@ void table_output(struct Flags* f){
 
     }
     if (f->system_wide){
-        if (fd_path){
+         if (fd_path){
             rewinddir(fd_path);
         }
         if (proc_dir){
@@ -284,6 +284,7 @@ void table_output(struct Flags* f){
 
                         printf("%s %d\n", fd_entry->d_name, (int)fd_stat.st_ino);
                     }
+                    closedir(fd_path);
                 }
             }
 
