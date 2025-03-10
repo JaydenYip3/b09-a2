@@ -275,8 +275,11 @@ void table_output(struct Flags* f){
                         if (strcmp(fd_entry->d_name, ".") == 0 || strcmp(fd_entry->d_name, "..") == 0) {
                             continue;
                         }
+                        char fd_filename[1024];
+
+                        snprintf(fd_filename, sizeof(fd_filename), "/proc/%s/fd/%s", PID, fd_entry->d_name);
                         struct stat fd_stat;
-                        int fd = (int) strtol(fd_entry->d_name, NULL, 10);
+                        int fd = (int) strtol(fd_filename, NULL, 10);
                         if (fstat(fd, &fd_stat) < 0) {
                             //fprintf(stderr, "Error retrieving inode");
                             continue;
