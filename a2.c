@@ -231,15 +231,14 @@ void table_output(struct Flags* f){
                     continue;
                 }
                 struct stat fd_stat;
+                int fd = (int) strtol(fd_entry->d_name, NULL, 10);  // Convert FD string to an integer
 
-                int ret;
-                ret = fstat(fd_entry, &fd_stat);
-
-                if (ret < 0){
-                    fprintf(stderr, "Error retrieving Inode");
-                    exit(1);
+                if (fstat(fd, &fd_stat) < 0) {
+                    fprintf(stderr, "Error retrieving inode");
+                    continue;
                 }
-                printf("%s %s\n", fd_entry->d_name, fd_stat.st_ino);
+
+                printf("%s %d\n", fd_entry->d_name, fd_stat.st_ino);
             }
         }
 
