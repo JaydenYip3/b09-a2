@@ -273,8 +273,9 @@ void table_output(struct Flags* f){
                         printf("%s %d\n", fd_entry->d_name, (int)fd_stat.st_ino);
                     }
                 }
-        }
+            }
 
+         }
     }
     if (f->composite){
 
