@@ -65,7 +65,7 @@ Node* add_fd(Node *head, int fd){
     }
 
     new_node->next = current->next;
-    current->next = new_node->next;
+    current->next = new_node;
     return head;
 }
 
