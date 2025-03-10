@@ -162,6 +162,7 @@ void table_output(struct Flags* f){
     }
     if (f->system_wide){
         rewinddir(fd_path);
+        rewinddir(entry);
         printf("PID     FD     Filename\n");
         printf("========================\n");
         if (f->PID){
@@ -225,6 +226,7 @@ void table_output(struct Flags* f){
     }
     if (f->Vnodes){
         rewinddir(fd_path);
+        rewinddir(entry);
         printf("FD     Inode\n");
         printf("============\n");
         if (f->PID){
