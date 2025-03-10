@@ -247,6 +247,32 @@ void table_output(struct Flags* f){
             while ((entry = readdir(proc_dir))){
                 char PID[20];
                 snprintf(PID, sizeof(PID), "%.9s", entry->d_name);
+
+                if (!isdigit(PID[0])){
+                    continue;
+                }
+                if (owns_file(PID)) {
+                    char file_path[256];
+                    snprintf(file_path, sizeof(file_path), "/proc/%s/fd", PID);
+                    fd_path = opendir(file_path);
+
+                    if (!fd_path) {
+                        continue;
+                    }
+                    while ((fd_entry = readdir(fd_path)) != NULL){
+                        if (strcmp(fd_entry->d_name, ".") == 0 || strcmp(fd_entry->d_name, "..") == 0) {
+                            continue;
+                        }
+                        struct stat fd_stat;
+                        int fd = (int) strtol(fd_entry->d_name, NULL, 10);
+                        if (fstat(fd, &fd_stat) < 0) {
+                            //fprintf(stderr, "Error retrieving inode");
+                            continue;
+                        }
+
+                        printf("%s %d\n", fd_entry->d_name, (int)fd_stat.st_ino);
+                    }
+                }
         }
 
     }
