@@ -229,8 +229,9 @@ void table_output(struct Flags* f){
         }
     }
     if (f->Vnodes){
-        if (fd_path){
-            rewinddir(fd_path);
+
+         if (proc_dir){
+            rewinddir(proc_dir);
         }
 
 
