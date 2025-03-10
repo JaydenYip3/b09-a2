@@ -29,7 +29,7 @@ Node * createNode(int fd){
     struct stat fd_stat;
     if (fstat(fd, &fd_stat) < 0) {
         //fprintf(stderr, "Error retrieving inode");
-        return;
+        return NULL;
     }
     new_node->inode = (int)fd_stat.st_ino;
     new_node->next = NULL;
