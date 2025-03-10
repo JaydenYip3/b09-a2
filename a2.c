@@ -233,7 +233,7 @@ void table_output(struct Flags* f){
                     continue;
                 }
                 struct stat fd_stat;
-                int fd = (int) strtol(fd_entry->d_name, NULL, 10);  // Convert FD string to an integer
+                int fd = (int) strtol(fd_entry->d_name, NULL, 10);
 
                 if (fstat(fd, &fd_stat) < 0) {
                     //fprintf(stderr, "Error retrieving inode");
@@ -242,6 +242,9 @@ void table_output(struct Flags* f){
 
                 printf("%s %d\n", fd_entry->d_name, (int)fd_stat.st_ino);
             }
+        }
+        else{
+
         }
 
     }
