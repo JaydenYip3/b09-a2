@@ -311,6 +311,7 @@ void table_output(struct Flags* f){
             Node *print_nodes = head;
             while (print_nodes != NULL){
                 printf("%d      %d", print_nodes->fd, print_nodes->inode);
+                print_nodes = print_nodes->next;
             }
             free_fd(head);
         }
@@ -344,6 +345,7 @@ void table_output(struct Flags* f){
             Node *print_nodes = head;
             while (print_nodes != NULL){
                 printf("%d      %d", print_nodes->fd, print_nodes->inode);
+                print_nodes = print_nodes->next;
             }
             free_fd(head);
 
