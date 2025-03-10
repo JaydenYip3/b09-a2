@@ -234,7 +234,7 @@ void table_output(struct Flags* f){
                 int fd = (int) strtol(fd_entry->d_name, NULL, 10);  // Convert FD string to an integer
 
                 if (fstat(fd, &fd_stat) < 0) {
-                    fprintf(stderr, "Error retrieving inode");
+                    //fprintf(stderr, "Error retrieving inode");
                     continue;
                 }
 
