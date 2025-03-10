@@ -238,7 +238,7 @@ void table_output(struct Flags* f){
                     continue;
                 }
 
-                printf("%s %lu\n", fd_entry->d_name, (unsigned long)fd_stat.st_ino);
+                printf("%s %d\n", fd_entry->d_name, (int)fd_stat.st_ino);
             }
         }
 
