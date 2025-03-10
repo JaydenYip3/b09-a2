@@ -223,6 +223,25 @@ void table_output(struct Flags* f){
         }
     }
     if (f->Vnodes){
+        printf("FD     Inode\n");
+        printf("============\n");
+        if (f->PID){
+            while ((fd_entry = readdir(fd_path))  != NULL){
+                if (strcmp(fd_entry->d_name, ".") == 0 || strcmp(fd_entry->d_name, "..") == 0) {
+                    continue;
+                }
+                struct stat fd_stat;
+
+                int ret;
+                ret = fstat(fd_entry, &fd_stat);
+
+                if (ret < 0){
+                    fprintf(stderr, "Error retrieving Inode");
+                    exit(1);
+                }
+                printf("%s %s\n", fd_entry->d_name, fd_stat.st_ino);
+            }
+        }
 
     }
     if (f->composite){
