@@ -55,7 +55,7 @@ Node* add_fd(Node *head, int fd){
         return head;
     }
     Node *new_node = createNode(fd);
-    if (new_node){
+    if (!new_node){
         return head;
     }
     if (head ==NULL || head->fd > fd){
