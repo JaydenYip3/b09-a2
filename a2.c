@@ -229,19 +229,8 @@ void table_output(struct Flags* f){
         }
     }
     if (f->Vnodes){
-        if (!proc_dir) {
-            proc_dir = opendir("/proc");
-            if (!proc_dir) {
-                fprintf(stderr, "Error opening '/proc'");
-                exit(1);
-            }
-        }
-
-        if (fd_path) {
+        if (fd_path){
             rewinddir(fd_path);
-        }
-        if (proc_dir) {
-            rewinddir(proc_dir);
         }
 
 
