@@ -42,10 +42,10 @@ int contains_fd(Node *head, int fd){
     Node *current = head;
 
     while (current != NULL){
-        current = current->next;
         if (current->fd == fd){
             return 1;
         }
+        current = current->next;
     }
     return 0;
 }
