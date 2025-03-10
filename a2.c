@@ -23,31 +23,18 @@ typedef struct Node {
     struct Node *next;
 } Node;
 
-Node * createNode(int fd, char *fd_path){
+Node * createNode(int fd){
     Node *new_node = (Node*)malloc(sizeof(Node));
     if (!new_node){
         fprintf(stderr, "Memory allocation failed");
         exit(1);
     }
-
     new_node->fd = fd;
     struct stat fd_stat;
-
-    int real_fd = open(fd_path);
-    if (real_fd < 0) {
+    if (fstat(fd, &fd_stat) < 0) {
         //fprintf(stderr, "Error retrieving inode");
-        free(new_node);
         return NULL;
     }
-
-    if (fstat(real_fd, &fd_stat) < 0){
-        close(real_fd);
-        free(new_node);
-        reurn NULL;
-    }
-
-    close(real_fd);
-
     new_node->inode = (int)fd_stat.st_ino;
     new_node->next = NULL;
 
@@ -67,11 +54,11 @@ int contains_fd(Node *head, int fd){
     return 0;
 }
 
-Node* add_fd(Node *head, int fd, char *fd_path){
+Node* add_fd(Node *head, int fd){
     if (contains_fd(head, fd)){
         return head;
     }
-    Node *new_node = createNode(fd, fd_path);
+    Node *new_node = createNode(fd);
     if (!new_node){
         return head;
     }
@@ -322,9 +309,7 @@ void table_output(struct Flags* f){
                     continue;
                 }
                 int fd = (int) strtol(fd_entry->d_name, NULL, 10);
-                char path[512];
-                snprintf(path, sizeof(path), "/proc/%s/fd/%s", f->PID, fd_entry->d_name);
-                head = add_fd(head, fd, path);
+                head = add_fd(head, fd);
 
             }
             Node *print_nodes = head;
@@ -356,10 +341,7 @@ void table_output(struct Flags* f){
                             continue;
                         }
                         int fd = (int) strtol(fd_entry->d_name, NULL, 10);
-                        char path[512];
-                        snprintf(path, sizeof(path), "/proc/%s/fd/%s", PID, fd_entry->d_name);
-
-                        head = add_fd(head, fd, path);
+                        head = add_fd(head, fd);
                     }
                     closedir(fd_path);
                 }
