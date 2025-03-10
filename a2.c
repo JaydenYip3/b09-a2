@@ -244,7 +244,9 @@ void table_output(struct Flags* f){
             }
         }
         else{
-
+            while ((entry = readdir(proc_dir))){
+                char PID[20];
+                snprintf(PID, sizeof(PID), "%.9s", entry->d_name);
         }
 
     }
