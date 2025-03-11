@@ -254,7 +254,6 @@ void table_output(struct Flags* f){
                 if (strcmp(fd_entry->d_name, ".") == 0 || strcmp(fd_entry->d_name, "..") == 0) {
                     continue;
                 }
-                int fd = (int) strtol(fd_entry->d_name, NULL, 10);
 
                 char full_path[512];
                 snprintf(full_path, sizeof(full_path), "/proc/%s/fd/%s", f->PID, fd_entry->d_name);
@@ -266,7 +265,7 @@ void table_output(struct Flags* f){
                 if (ret < 0) {
                     continue;
                 }
-                printf("         %-14d %ld\n", fd, file_stat.st_ino);
+                printf("         %-14.14s %ld\n", fd_entry->d_name, file_stat.st_ino);
             }
 
             }
@@ -291,7 +290,6 @@ void table_output(struct Flags* f){
                         if (strcmp(fd_entry->d_name, ".") == 0 || strcmp(fd_entry->d_name, "..") == 0) {
                             continue;
                         }
-                        int fd = (int) strtol(fd_entry->d_name, NULL, 10);
                         char full_path[512];
                         snprintf(full_path, sizeof(full_path), "/proc/%s/fd/%s", PID, fd_entry->d_name);
 
@@ -301,7 +299,7 @@ void table_output(struct Flags* f){
                         if (ret < 0) {
                             continue;
                         }
-                        printf("%-8d %-14d %ld\n", count++, fd, file_stat.st_ino);
+                        printf("%-8d %-14.14s %ld\n", count++, fd_entry->d_name, file_stat.st_ino);
 
                     }
                     closedir(fd_path);
