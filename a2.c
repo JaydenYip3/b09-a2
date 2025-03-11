@@ -5,6 +5,7 @@
 #include <dirent.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <fcntl.h>
 #include <ctype.h>
 
 struct Flags {
@@ -23,23 +24,32 @@ typedef struct Node {
     struct Node *next;
 } Node;
 
-Node * createNode(int fd){
+Node *createNode(int fd, char *fd_path) {
     Node *new_node = (Node*)malloc(sizeof(Node));
     if (!new_node){
         fprintf(stderr, "Memory allocation failed");
         exit(1);
     }
     new_node->fd = fd;
+
     struct stat fd_stat;
-    if (fstat(fd, &fd_stat) < 0) {
-        //fprintf(stderr, "Error retrieving inode");
+
+    int real_fd = open(fd_path, O_RDONLY);
+    if (real_fd < 0) {
+        free(new_node);
         return NULL;
     }
+
+    if (fstat(real_fd, &fd_stat) < 0) {
+        close(real_fd);
+        free(new_node);
+        return NULL;
+    }
+    close(real_fd);
+
     new_node->inode = (int)fd_stat.st_ino;
     new_node->next = NULL;
-
     return new_node;
-
 }
 
 int contains_fd(Node *head, int fd){
@@ -54,20 +64,22 @@ int contains_fd(Node *head, int fd){
     return 0;
 }
 
-Node* add_fd(Node *head, int fd){
+Node* add_fd(Node *head, int fd, char *fd_path) {
     if (contains_fd(head, fd)){
         return head;
     }
-    Node *new_node = createNode(fd);
+    Node *new_node = createNode(fd, fd_path);
     if (!new_node){
         return head;
     }
-    if (head ==NULL || head->fd > fd){
+
+    if (head == NULL || head->fd > fd) {
         new_node->next = head;
         return new_node;
     }
+
     Node *current = head;
-    while (current->next != NULL && current->next->fd < fd){
+    while (current->next != NULL && current->next->fd < fd) {
         current = current->next;
     }
 
@@ -293,32 +305,35 @@ void table_output(struct Flags* f){
             }
         }
     }
-    if (f->Vnodes){
-
-         if (proc_dir){
+    if (f->Vnodes) {
+        if (proc_dir) {
             rewinddir(proc_dir);
         }
 
-
         printf("FD     Inode\n");
         printf("============\n");
-        if (f->PID){
+
+        if (f->PID) {
             Node *head = NULL;
-            while ((fd_entry = readdir(fd_path))  != NULL){
+            while ((fd_entry = readdir(fd_path)) != NULL) {
                 if (strcmp(fd_entry->d_name, ".") == 0 || strcmp(fd_entry->d_name, "..") == 0) {
                     continue;
                 }
                 int fd = (int) strtol(fd_entry->d_name, NULL, 10);
-                head = add_fd(head, fd);
 
+                char full_path[512];
+                snprintf(full_path, sizeof(full_path), "/proc/%s/fd/%s", f->PID, fd_entry->d_name);
+
+                head = add_fd(head, fd, full_path);
             }
             Node *print_nodes = head;
-            while (print_nodes != NULL){
+            while (print_nodes != NULL) {
                 printf("%d      %d\n", print_nodes->fd, print_nodes->inode);
                 print_nodes = print_nodes->next;
             }
             free_fd(head);
         }
+    }
         else{
             Node *head = NULL;
             while ((entry = readdir(proc_dir))){
