@@ -8,7 +8,7 @@
 #include <fcntl.h>
 #include <ctype.h>
 
-struct Flags {
+typedef struct Flags {
         int per_process;
         int system_wide;
         int Vnodes;
@@ -16,7 +16,7 @@ struct Flags {
         int summary;
         int threshold_int;
         char* PID;
-    };
+    }Flags;
 
 
 int owns_file(char *PID){
@@ -31,7 +31,7 @@ int owns_file(char *PID){
     return st.st_uid == getuid();
 
 }
-void parse_args(struct Flags* f, int argc, char** argv){
+void parse_args(Flags* f, int argc, char** argv){
     f->per_process = 0;
     f->system_wide = 0;
     f->Vnodes = 0;
@@ -107,7 +107,15 @@ void parse_args(struct Flags* f, int argc, char** argv){
         }
     }
 }
+void PID_per_process_output_single(Flags* f, DIR *fd_path, struct dirent *fd_entry){
+    while ((fd_entry = readdir(fd_path))  != NULL){
+        if (strcmp(fd_entry->d_name, ".") == 0 || strcmp(fd_entry->d_name, "..") == 0) {
+            continue;
+        }
+        printf("         %-7.7s %s\n", f->PID, fd_entry->d_name);
+    }
 
+}
 void table_output(struct Flags* f){
     //printf("%s", f->PID);
     struct dirent *entry;
@@ -132,12 +140,7 @@ void table_output(struct Flags* f){
         printf("         PID     FD\n");
         printf("        ============\n");
         if (f->PID){
-            while ((fd_entry = readdir(fd_path))  != NULL){
-                if (strcmp(fd_entry->d_name, ".") == 0 || strcmp(fd_entry->d_name, "..") == 0) {
-                    continue;
-                }
-                printf("         %-7.7s %s\n", f->PID, fd_entry->d_name);
-            }
+            PID_per_process_output_single(f, fd_path, fd_entry);
         }
         else{
             int count = 0;
@@ -494,8 +497,6 @@ void table_output(struct Flags* f){
 }
 
 int main(int argc, char** argv){
-
-    typedef struct Flags Flags;
 
     Flags input_flags;
     parse_args(&input_flags, argc, argv);
