@@ -387,11 +387,11 @@ void table_output(struct Flags* f){
                         snprintf(fd_entry_link, sizeof(fd_entry_link), "/proc/%.9s/fd/%s", PID, fd_entry->d_name);
                         ssize_t length = readlink(fd_entry_link, fd_filename, sizeof(fd_filename) - 1);
                         if (length == -1){
-                            printf("%-8d %-7.7s %-7.7s %s       %ld\n", count, f->PID, fd_entry->d_name, "", file_stat.st_ino);
+                            printf("%-8d %-7.7s %-7.7s %s       %ld\n", count, entry->d_name, fd_entry->d_name, "", file_stat.st_ino);
                         }
                         else{
                             fd_filename[length] = '\0';
-                            printf("%-8d %-7.7s %-7.7s %s       %ld\n", count, f->PID, fd_entry->d_name, fd_filename, file_stat.st_ino);
+                            printf("%-8d %-7.7s %-7.7s %s       %ld\n", count, entry->d_name, fd_entry->d_name, fd_filename, file_stat.st_ino);
                         }
 
                     }
