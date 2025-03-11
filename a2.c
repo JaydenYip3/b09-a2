@@ -266,7 +266,7 @@ void table_output(struct Flags* f){
                 if (ret < 0) {
                     continue;
                 }
-                printf("         %-11d %ld\n", fd, file_stat.st_ino);
+                printf("         %-14d %ld\n", fd, file_stat.st_ino);
             }
 
             }
@@ -301,7 +301,7 @@ void table_output(struct Flags* f){
                         if (ret < 0) {
                             continue;
                         }
-                        printf("%-8d %-11d %ld\n", count++, fd, file_stat.st_ino);
+                        printf("%-8d %-14d %ld\n", count++, fd, file_stat.st_ino);
 
                     }
                     closedir(fd_path);
