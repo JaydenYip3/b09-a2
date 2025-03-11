@@ -312,6 +312,40 @@ void table_output(struct Flags* f){
          printf("        ========================================\n\n");
     }
     if (f->composite){
+        if (proc_dir) {
+            rewinddir(proc_dir);
+        }
+        printf("         PID     FD       Filename       Inode\n");
+        printf("        ========================================\n");
+        if (f->PID){
+            if (fd_path) {
+                rewinddir(fd_path);
+            }
+            while ((fd_entry = readdir(fd_path))  != NULL){
+                if (strcmp(fd_entry->d_name, ".") == 0 || strcmp(fd_entry->d_name, "..") == 0) {
+                    continue;
+                }
+                char fd_filename[1024];
+                char fd_entry_link[512]; //this might be bad...
+                snprintf(fd_entry_link, sizeof(fd_entry_link), "/proc/%.9s/fd/%s", f->PID, fd_entry->d_name);
+                ssize_t length = readlink(fd_entry_link, fd_filename, sizeof(fd_filename) - 1);
+
+
+                char full_path[512];
+                snprintf(full_path, sizeof(full_path), "/proc/%s/fd/%s", f->PID, fd_entry->d_name);
+
+
+                struct stat file_stat;
+                int ret = fstatat(AT_FDCWD, full_path, &file_stat, AT_SYMLINK_NOFOLLOW);
+
+                if (ret < 0) {
+                    continue;
+                }
+
+
+                printf("         %-7.7s %-7.7s %s       \n", f->PID, fd_entry->d_name, fd_filename, file_stat.st_ino);
+            }
+        }
 
     }
     if (f->summary){
