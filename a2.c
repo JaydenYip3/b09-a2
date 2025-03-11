@@ -279,7 +279,7 @@ void table_output(struct Flags* f){
                         }
                         int fd = (int) strtol(fd_entry->d_name, NULL, 10);
                         char full_path[512];
-                        snprintf(file_path, sizeof(file_path), "/proc/%s/fd/%s", PID, fd_entry->d_name);
+                        snprintf(full_path, sizeof(full_path), "/proc/%s/fd/%s", PID, fd_entry->d_name);
 
                         struct stat file_stat;
                         int ret = stat(full_path, &file_stat);
