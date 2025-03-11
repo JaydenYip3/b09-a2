@@ -273,6 +273,92 @@ void Vnodes_output_multiple_PID(DIR* fd_path, DIR* proc_dir, struct dirent *fd_e
     }
 
 }
+void composite_output_single_PID(Flags* f,DIR* fd_path, struct dirent *fd_entry){
+    if (fd_path) {
+        rewinddir(fd_path);
+    }
+    while ((fd_entry = readdir(fd_path))  != NULL){
+        if (strcmp(fd_entry->d_name, ".") == 0 || strcmp(fd_entry->d_name, "..") == 0) {
+            continue;
+        }
+        char fd_filename[1024];
+        char fd_entry_link[512]; //this might be bad...
+        snprintf(fd_entry_link, sizeof(fd_entry_link), "/proc/%.9s/fd/%s", f->PID, fd_entry->d_name);
+        ssize_t length = readlink(fd_entry_link, fd_filename, sizeof(fd_filename) - 1);
+
+
+        char full_path[512];
+        snprintf(full_path, sizeof(full_path), "/proc/%s/fd/%s", f->PID, fd_entry->d_name);
+
+
+        struct stat file_stat;
+        int ret = fstatat(AT_FDCWD, full_path, &file_stat, AT_SYMLINK_NOFOLLOW);
+
+        if (ret < 0) {
+            continue;
+        }
+        if (length == -1){
+            printf("         %-7.7s %-7.7s %s       %ld\n", f->PID, fd_entry->d_name, "", file_stat.st_ino);
+        }
+        else{
+            fd_filename[length] = '\0';
+            printf("         %-7.7s %-7.7s %s       %ld\n", f->PID, fd_entry->d_name, fd_filename, file_stat.st_ino);
+        }
+
+    }
+}
+void composite_output_multiple_PID(DIR* fd_path, DIR* proc_dir, struct dirent *fd_entry, struct dirent *entry){
+    int count = 0;
+    while ((entry = readdir(proc_dir))){
+        char PID[20];
+        snprintf(PID, sizeof(PID), "%.9s", entry->d_name);
+
+        if (!isdigit(PID[0])){
+            continue;
+        }
+
+        if (owns_file(PID)){
+            char file_path[256];
+            snprintf(file_path, sizeof(file_path), "/proc/%s/fd", PID);
+            fd_path = opendir(file_path);
+
+            if (!fd_path){
+                //error accessing the path as a safety check
+                continue;
+            }
+
+            while ((fd_entry = readdir(fd_path)) != NULL){
+                if (strcmp(fd_entry->d_name, ".") == 0 || strcmp(fd_entry->d_name, "..") == 0) {
+                    continue;
+                }
+                char full_path[512];
+                snprintf(full_path, sizeof(full_path), "/proc/%s/fd/%s", PID, fd_entry->d_name);
+
+                struct stat file_stat;
+                int ret = fstatat(AT_FDCWD, full_path, &file_stat, AT_SYMLINK_NOFOLLOW);
+
+                if (ret < 0) {
+                    continue;
+                }
+                char fd_filename[1024];
+                char fd_entry_link[512]; //this might be bad...
+                snprintf(fd_entry_link, sizeof(fd_entry_link), "/proc/%.9s/fd/%s", PID, fd_entry->d_name);
+                ssize_t length = readlink(fd_entry_link, fd_filename, sizeof(fd_filename) - 1);
+                if (length == -1){
+                    printf("%-8d %-7.7s %-7.7s %s       %ld\n", count++, entry->d_name, fd_entry->d_name, "", file_stat.st_ino);
+                }
+                else{
+                    fd_filename[length] = '\0';
+                    printf("%-8d %-7.7s %-7.7s %s       %ld\n", count++, entry->d_name, fd_entry->d_name, fd_filename, file_stat.st_ino);
+                }
+
+            }
+            closedir(fd_path);
+        }
+
+
+    }
+}
 void table_output(struct Flags* f){
     //printf("%s", f->PID);
     struct dirent *entry;
@@ -345,90 +431,10 @@ void table_output(struct Flags* f){
         printf("         PID     FD       Filename       Inode\n");
         printf("        ========================================\n");
         if (f->PID){
-            if (fd_path) {
-                rewinddir(fd_path);
-            }
-            while ((fd_entry = readdir(fd_path))  != NULL){
-                if (strcmp(fd_entry->d_name, ".") == 0 || strcmp(fd_entry->d_name, "..") == 0) {
-                    continue;
-                }
-                char fd_filename[1024];
-                char fd_entry_link[512]; //this might be bad...
-                snprintf(fd_entry_link, sizeof(fd_entry_link), "/proc/%.9s/fd/%s", f->PID, fd_entry->d_name);
-                ssize_t length = readlink(fd_entry_link, fd_filename, sizeof(fd_filename) - 1);
-
-
-                char full_path[512];
-                snprintf(full_path, sizeof(full_path), "/proc/%s/fd/%s", f->PID, fd_entry->d_name);
-
-
-                struct stat file_stat;
-                int ret = fstatat(AT_FDCWD, full_path, &file_stat, AT_SYMLINK_NOFOLLOW);
-
-                if (ret < 0) {
-                    continue;
-                }
-                if (length == -1){
-                    printf("         %-7.7s %-7.7s %s       %ld\n", f->PID, fd_entry->d_name, "", file_stat.st_ino);
-                }
-                else{
-                    fd_filename[length] = '\0';
-                    printf("         %-7.7s %-7.7s %s       %ld\n", f->PID, fd_entry->d_name, fd_filename, file_stat.st_ino);
-                }
-
-            }
+            composite_output_single_PID(f,fd_path,fd_entry);
         }
         else{
-            int count = 0;
-            while ((entry = readdir(proc_dir))){
-                char PID[20];
-                snprintf(PID, sizeof(PID), "%.9s", entry->d_name);
-
-                if (!isdigit(PID[0])){
-                    continue;
-                }
-
-                if (owns_file(PID)){
-                    char file_path[256];
-                    snprintf(file_path, sizeof(file_path), "/proc/%s/fd", PID);
-                    fd_path = opendir(file_path);
-
-                    if (!fd_path){
-                        //error accessing the path as a safety check
-                        continue;
-                    }
-
-                    while ((fd_entry = readdir(fd_path)) != NULL){
-                        if (strcmp(fd_entry->d_name, ".") == 0 || strcmp(fd_entry->d_name, "..") == 0) {
-                           continue;
-                        }
-                        char full_path[512];
-                        snprintf(full_path, sizeof(full_path), "/proc/%s/fd/%s", PID, fd_entry->d_name);
-
-                        struct stat file_stat;
-                        int ret = fstatat(AT_FDCWD, full_path, &file_stat, AT_SYMLINK_NOFOLLOW);
-
-                        if (ret < 0) {
-                            continue;
-                        }
-                        char fd_filename[1024];
-                        char fd_entry_link[512]; //this might be bad...
-                        snprintf(fd_entry_link, sizeof(fd_entry_link), "/proc/%.9s/fd/%s", PID, fd_entry->d_name);
-                        ssize_t length = readlink(fd_entry_link, fd_filename, sizeof(fd_filename) - 1);
-                        if (length == -1){
-                            printf("%-8d %-7.7s %-7.7s %s       %ld\n", count++, entry->d_name, fd_entry->d_name, "", file_stat.st_ino);
-                        }
-                        else{
-                            fd_filename[length] = '\0';
-                            printf("%-8d %-7.7s %-7.7s %s       %ld\n", count++, entry->d_name, fd_entry->d_name, fd_filename, file_stat.st_ino);
-                        }
-
-                    }
-                    closedir(fd_path);
-                }
-
-
-            }
+            composite_output_multiple_PID(fd_path,proc_dir,fd_entry,entry);
         }
         printf("        ========================================\n");
 
