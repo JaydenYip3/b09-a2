@@ -246,15 +246,9 @@ void table_output(struct Flags* f){
                 char full_path[512];
                 snprintf(full_path, sizeof(full_path), "/proc/%s/fd/%s", f->PID, fd_entry->d_name);
 
-                int real_fd = open(full_path, O_RDONLY);
-                if (real_fd < 0) {
-                    //fprintf(stderr, "Not found")
-                    continue;
-                }
 
                 struct stat file_stat;
-                int ret = fstat(real_fd, &file_stat);
-                close(real_fd);
+                int ret = fstat(full_path, &file_stat);
 
                 if (ret < 0) {
                     continue;
