@@ -221,7 +221,6 @@ void table_output(struct Flags* f){
                             printf("%.7s %s %s\n", PID, fd_entry->d_name, fd_filename);
                         }
                     }
-                    closedir(fd_path);
                 }
 
 
