@@ -132,6 +132,9 @@ void parse_args(Flags* f, int argc, char** argv){
             f->threshold_int =  (int)strtol(argv[index]+ 12, NULL, 10);
 
             if (f->threshold_int <= 0){
+                // tests if threshold is a valid number
+                //should catch if letters input as well
+
                 fprintf(stderr, "Please pick a threshold strictly greater than 0.\n");
                 exit(1);
             }
@@ -139,35 +142,56 @@ void parse_args(Flags* f, int argc, char** argv){
 
         }
         else{
+            //if runs through all flags and none match then the flag is unknown
             fprintf(stderr, "There is an unrecognized flag or arguement inputted. \n");
             exit(1);
         }
     }
 }
 void per_process_output_single_PID(Flags* f, DIR *fd_path, struct dirent *fd_entry){
+    // descry: Draws the outputs for the table for the per process flag for a singular process
+    // f: Custom struct made to hold true or false values and strings, type Flags.
+    // fd_path: directory path to the PID fd directory, type DIR.
+    // fd_entry: pointer to a file in a directory (iterates through all in a PID, type struct dirent
+    // returning: No return value.
     while ((fd_entry = readdir(fd_path))  != NULL){
+        //iterates through each fd in the directory
         if (strcmp(fd_entry->d_name, ".") == 0 || strcmp(fd_entry->d_name, "..") == 0) {
+            // removes teh fds with values of "." and ".."
             continue;
         }
         printf("         %-7.7s %s\n", f->PID, fd_entry->d_name);
+        // print format for output
     }
 
 }
 
 void per_process_output_multiple_PID(DIR* fd_path, DIR* proc_dir, struct dirent *fd_entry, struct dirent *entry){
+    // descry: Draws the outputs for the table for the per process flag for all the running processes
+    // fd_path: directory path to the PID fd directory, type DIR.
+    // proc_dir: Directory to /proc/ where it contains all the PIDs, type DIR
+    // fd_entry: pointer to a file in adirectory (iterates through all in a PID, type struct dirent
+    // entry: pointer to a file in a directory, iterates through all the PIDs, type struct dirent
+    // returning: No return value.
+
     int count = 0;
+    // counter for the ouptput format
     while ((entry = readdir(proc_dir))){
+        // iterates through each PID in the /proc/
         char PID[20];
         snprintf(PID, sizeof(PID), "%.9s", entry->d_name);
 
-        if (!isdigit(PID[0])){
+        if (!isdigit(PID)){
+            //PIDs only contain numbers
             continue;
         }
 
         if (owns_file(PID)){
+            //checks if has access to the PID
             char file_path[256];
             snprintf(file_path, sizeof(file_path), "/proc/%s/fd", PID);
             fd_path = opendir(file_path);
+            //path of the current PID's file directory
 
             if (!fd_path){
                 //error accessing the path as a safety check
@@ -175,12 +199,16 @@ void per_process_output_multiple_PID(DIR* fd_path, DIR* proc_dir, struct dirent 
             }
 
             while ((fd_entry = readdir(fd_path)) != NULL){
+                //iterates through each fd in the directory
                 if (strcmp(fd_entry->d_name, ".") == 0 || strcmp(fd_entry->d_name, "..") == 0) {
+                    // removes teh fds with values of "." and ".."
                     continue;
                 }
                 printf("%-8d %-7.7s  %s\n", count++, PID, fd_entry->d_name);
+                //prints the formatted output
             }
             closedir(fd_path);
+            //closes directory for safety
         }
 
 
@@ -188,33 +216,64 @@ void per_process_output_multiple_PID(DIR* fd_path, DIR* proc_dir, struct dirent 
 
 }
 void system_Wide_output_single_PID(Flags* f,DIR* fd_path, struct dirent *fd_entry){
+    // descry: Draws the outputs for the table for the system Wide flag for a singular process
+    // f: Custom struct made to hold true or false values and strings, type Flags.
+    // fd_path: directory path to the PID fd directory, type DIR.
+    // fd_entry: pointer to a file in a directory (iterates through all in a PID, type struct dirent
+    // returning: No return value.
+
     if (fd_path) {
+        //checks if fd_path was used
         rewinddir(fd_path);
+        //resets the fd_path to the beginning of the fds
     }
         while ((fd_entry = readdir(fd_path))  != NULL){
+            //iterates through each fd in the directory
             if (strcmp(fd_entry->d_name, ".") == 0 || strcmp(fd_entry->d_name, "..") == 0) {
+                // removes teh fds with values of "." and ".."
                 continue;
             }
+
             char fd_filename[1024];
             char fd_entry_link[512]; //this might be bad...
+
             snprintf(fd_entry_link, sizeof(fd_entry_link), "/proc/%.9s/fd/%s", f->PID, fd_entry->d_name);
+            //gets the specific PID and FD to use for the directory path.
+
             ssize_t length = readlink(fd_entry_link, fd_filename, sizeof(fd_filename) - 1);
+            // obtains and checks if the PID and FD path is valid
             if (length == -1){
+                //invalid PID and FD path
                 printf("%.7s %s\n", f->PID, fd_entry->d_name);
             }
             else{
                 fd_filename[length] = '\0';
+                //delimeter
                 printf("         %-7.7s %-7.7s %s\n", f->PID, fd_entry->d_name, fd_filename);
+                //prints the formatted output
             }
         }
 }
 void system_Wide_output_multiple_PID(DIR* fd_path, DIR* proc_dir, struct dirent *fd_entry, struct dirent *entry){
+    // descry: Draws the outputs for the table for the system Wide flag for all the running processes
+    // fd_path: directory path to the PID fd directory, type DIR.
+    // proc_dir: Directory to /proc/ where it contains all the PIDs, type DIR
+    // fd_entry: pointer to a file in adirectory (iterates through all in a PID, type struct dirent
+    // entry: pointer to a file in a directory, iterates through all the PIDs, type struct dirent
+    // returning: No return value.
+
     int count = 0;
+    // counter for the ouptput format
+
     while ((entry = readdir(proc_dir))){
+         // iterates through each PID in the /proc/
+
         char PID[20];
         snprintf(PID, sizeof(PID), "%.9s", entry->d_name);
+        //gets the PID
 
-        if (!isdigit(PID[0])){
+        if (!isdigit(PID)){
+            // PIDs can only be digits
             continue;
         }
 
