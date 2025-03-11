@@ -105,6 +105,10 @@ void parse_args(Flags* f, int argc, char** argv){
                 exit(1);
             }
         }
+        else{
+            fprintf(stderr, "There is an unrecognized flag or arguement inputted.");
+            exit(1);
+        }
     }
 }
 void per_process_output_single_PID(Flags* f, DIR *fd_path, struct dirent *fd_entry){
