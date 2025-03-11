@@ -437,7 +437,7 @@ void table_output(struct Flags* f){
                 }
                 closedir(fd_dir);
 
-                printf("         %-7.7s (%-7d),\n", PID, fd_count);
+                printf("%-7.7s (%d),   ", PID, fd_count);
             }
         }
         printf("        ==================\n\n");
