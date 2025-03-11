@@ -318,7 +318,7 @@ void table_output(struct Flags* f){
                     continue;
                 }
                 int fd = (int) strtol(fd_entry->d_name, NULL, 10);
-                head = add_fd(head, fd);
+                head = add_fd(head, fd_path, fd);
 
             }
             Node *print_nodes = head;
