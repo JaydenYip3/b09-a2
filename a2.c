@@ -150,7 +150,7 @@ void per_process_output_multiple_PID(DIR* fd_path, DIR* proc_dir, struct dirent 
     }
 
 }
-void system_Wide_output_single_PID(Flags* f,DIR* fd_path, DIR* proc_dir, struct dirent *fd_entry, struct dirent *entry){
+void system_Wide_output_single_PID(Flags* f,DIR* fd_path, struct dirent *fd_entry){
     if (fd_path) {
         rewinddir(fd_path);
     }
@@ -211,7 +211,7 @@ void table_output(struct Flags* f){
         printf("         PID     FD      Filename\n");
         printf("        ========================================\n");
         if (f->PID){
-            system_Wide_output_single_PID(f, fd_path,proc_dir,fd_entry,entry);
+            system_Wide_output_single_PID(f, fd_path,fd_entry);
         }
         else{
             int count = 0;
