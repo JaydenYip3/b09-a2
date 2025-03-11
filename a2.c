@@ -167,6 +167,9 @@ void table_output(struct Flags* f){
 
     }
     if (f->system_wide){
+        if (fd_path) {
+            rewinddir(fd_path);
+        }
         if (proc_dir){
             rewinddir(proc_dir);
         }
