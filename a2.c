@@ -170,9 +170,10 @@ void table_output(struct Flags* f){
         if (fd_path) {
             rewinddir(fd_path);
         }
-        if (proc_dir){
-            rewinddir(proc_dir);
+        if (proc_dir) {
+            closedir(proc_dir);
         }
+        proc_dir = opendir("/proc");
         printf("         PID     FD      Filename\n");
         printf("        ========================================\n");
         if (f->PID){
@@ -240,9 +241,13 @@ void table_output(struct Flags* f){
         if (fd_path) {
             rewinddir(fd_path);
         }
-        if (proc_dir) {
-            rewinddir(proc_dir);
+        else{
+
         }
+        if (proc_dir) {
+            closedir(proc_dir);
+        }
+        proc_dir = opendir("/proc");
 
         printf("         FD            Inode\n");
         printf("        ========================================\n");
@@ -305,8 +310,9 @@ void table_output(struct Flags* f){
                     closedir(fd_path);
                 }
             }
-            printf("        ========================================\n\n");
+
          }
+         printf("        ========================================\n\n");
     }
     if (f->composite){
 
