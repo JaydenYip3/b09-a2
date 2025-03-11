@@ -121,17 +121,18 @@ void table_output(struct Flags* f){
     }
 
     if (f->per_process){
-        printf("PID     FD\n");
-        printf("==========\n");
+        printf("         PID     FD\n");
+        printf("        ============\n");
         if (f->PID){
             while ((fd_entry = readdir(fd_path))  != NULL){
                 if (strcmp(fd_entry->d_name, ".") == 0 || strcmp(fd_entry->d_name, "..") == 0) {
                     continue;
                 }
-                printf("%.7s %s\n", f->PID, fd_entry->d_name);
+                printf("         %-7.7s %s\n", f->PID, fd_entry->d_name);
             }
         }
         else{
+            int count = 0;
             while ((entry = readdir(proc_dir))){
                 char PID[20];
                 snprintf(PID, sizeof(PID), "%.9s", entry->d_name);
@@ -149,11 +150,12 @@ void table_output(struct Flags* f){
                         //error accessing the path as a safety check
                         continue;
                     }
+
                     while ((fd_entry = readdir(fd_path)) != NULL){
                         if (strcmp(fd_entry->d_name, ".") == 0 || strcmp(fd_entry->d_name, "..") == 0) {
                            continue;
                         }
-                        printf("%.7s %s\n", PID, fd_entry->d_name);
+                        printf("%-8d %-7.7s  %s\n", count++, PID, fd_entry->d_name);
                     }
                     closedir(fd_path);
                 }
@@ -161,14 +163,15 @@ void table_output(struct Flags* f){
 
             }
         }
+        printf("        ============\n");
 
     }
     if (f->system_wide){
         if (proc_dir){
             rewinddir(proc_dir);
         }
-        printf("PID     FD     Filename\n");
-        printf("========================\n");
+        printf("         PID     FD      Filename\n");
+        printf("        ========================================\n");
         if (f->PID){
             while ((fd_entry = readdir(fd_path))  != NULL){
                 if (strcmp(fd_entry->d_name, ".") == 0 || strcmp(fd_entry->d_name, "..") == 0) {
@@ -183,11 +186,12 @@ void table_output(struct Flags* f){
                 }
                 else{
                     fd_filename[length] = '\0';
-                    printf("%.7s %s %s\n", f->PID, fd_entry->d_name, fd_filename);
+                    printf("         %-7.7s %-7.7s %s\n", f->PID, fd_entry->d_name, fd_filename);
                 }
             }
         }
         else{
+            int count = 0;
             while ((entry = readdir(proc_dir))){
                 char PID[20];
                 snprintf(PID, sizeof(PID), "%.9s", entry->d_name);
@@ -218,7 +222,7 @@ void table_output(struct Flags* f){
                         }
                         else{
                             fd_filename[length] = '\0';
-                            printf("%.7s %s %s\n", PID, fd_entry->d_name, fd_filename);
+                            printf("%-8d %-7.7s %-7.7s %s\n", count++, PID, fd_entry->d_name, fd_filename);
                         }
                     }
                     closedir(fd_path);
@@ -227,6 +231,7 @@ void table_output(struct Flags* f){
 
             }
         }
+        printf("========================================\n");
     }
     if (f->Vnodes) {
         if (fd_path) {
@@ -236,8 +241,8 @@ void table_output(struct Flags* f){
             rewinddir(proc_dir);
         }
 
-        printf("FD     Inode\n");
-        printf("============\n");
+        printf("FD            Inode\n");
+        printf("========================================\n");
 
         if (f->PID) {
             while ((fd_entry = readdir(fd_path)) != NULL) {
@@ -256,11 +261,12 @@ void table_output(struct Flags* f){
                 if (ret < 0) {
                     continue;
                 }
-                printf("%d      %ld\n", fd, file_stat.st_ino);
+                printf("%-11d %ld\n", fd, file_stat.st_ino);
             }
 
             }
         else{
+            int count = 0;
             while ((entry = readdir(proc_dir))){
                 char PID[20];
                 snprintf(PID, sizeof(PID), "%.9s", entry->d_name);
@@ -290,7 +296,7 @@ void table_output(struct Flags* f){
                         if (ret < 0) {
                             continue;
                         }
-                        printf("%d      %ld\n", fd, file_stat.st_ino);
+                        printf("%-8d %-11d %ld\n", count++, fd, file_stat.st_ino);
 
                     }
                     closedir(fd_path);
