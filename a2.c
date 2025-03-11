@@ -278,6 +278,17 @@ void table_output(struct Flags* f){
                             continue;
                         }
                         int fd = (int) strtol(fd_entry->d_name, NULL, 10);
+                        char full_path[512];
+                        snprintf(file_path, sizeof(file_path), "/proc/%s/fd/%s", PID, fd_entry->d_name);
+
+                        struct stat file_stat;
+                        int ret = stat(full_path, &file_stat);
+
+                        if (ret < 0) {
+                            continue;
+                        }
+                        printf("%d      %ld\n", fd, file_stat.st_ino);
+
                     }
                     closedir(fd_path);
                 }
