@@ -107,7 +107,7 @@ void parse_args(Flags* f, int argc, char** argv){
         }
     }
 }
-void er_process_output_single_PID(Flags* f, DIR *fd_path, struct dirent *fd_entry){
+void per_process_output_single_PID(Flags* f, DIR *fd_path, struct dirent *fd_entry){
     while ((fd_entry = readdir(fd_path))  != NULL){
         if (strcmp(fd_entry->d_name, ".") == 0 || strcmp(fd_entry->d_name, "..") == 0) {
             continue;
