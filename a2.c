@@ -282,7 +282,7 @@ void table_output(struct Flags* f){
                         snprintf(full_path, sizeof(full_path), "/proc/%s/fd/%s", PID, fd_entry->d_name);
 
                         struct stat file_stat;
-                        int ret = stat(full_path, &file_stat);
+                        int ret = fstatat(AT_FDCWD, full_path, &file_stat, AT_SYMLINK_NOFOLLOW);
 
                         if (ret < 0) {
                             continue;
