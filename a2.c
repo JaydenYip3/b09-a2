@@ -248,7 +248,7 @@ void table_output(struct Flags* f){
 
 
                 struct stat file_stat;
-                int ret = fstat(full_path, &file_stat);
+                int ret = stat(full_path, &file_stat);
 
                 if (ret < 0) {
                     continue;
