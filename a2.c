@@ -212,6 +212,28 @@ void system_Wide_output_multiple_PID(DIR* fd_path, DIR* proc_dir, struct dirent 
 
     }
 }
+void Vnodes_ouptput_single_PID(Flags* f,DIR* fd_path, struct dirent *fd_entry){
+    if (fd_path) {
+        rewinddir(fd_path);
+    }
+    while ((fd_entry = readdir(fd_path)) != NULL) {
+        if (strcmp(fd_entry->d_name, ".") == 0 || strcmp(fd_entry->d_name, "..") == 0) {
+            continue;
+        }
+
+        char full_path[512];
+        snprintf(full_path, sizeof(full_path), "/proc/%s/fd/%s", f->PID, fd_entry->d_name);
+
+
+        struct stat file_stat;
+        int ret = fstatat(AT_FDCWD, full_path, &file_stat, AT_SYMLINK_NOFOLLOW);
+
+        if (ret < 0) {
+            continue;
+        }
+        printf("         %-14.14s %ld\n", fd_entry->d_name, file_stat.st_ino);
+    }
+}
 void table_output(struct Flags* f){
     //printf("%s", f->PID);
     struct dirent *entry;
@@ -269,27 +291,7 @@ void table_output(struct Flags* f){
         printf("        ========================================\n");
 
         if (f->PID) {
-            if (fd_path) {
-                rewinddir(fd_path);
-            }
-            while ((fd_entry = readdir(fd_path)) != NULL) {
-                if (strcmp(fd_entry->d_name, ".") == 0 || strcmp(fd_entry->d_name, "..") == 0) {
-                    continue;
-                }
-
-                char full_path[512];
-                snprintf(full_path, sizeof(full_path), "/proc/%s/fd/%s", f->PID, fd_entry->d_name);
-
-
-                struct stat file_stat;
-                int ret = fstatat(AT_FDCWD, full_path, &file_stat, AT_SYMLINK_NOFOLLOW);
-
-                if (ret < 0) {
-                    continue;
-                }
-                printf("         %-14.14s %ld\n", fd_entry->d_name, file_stat.st_ino);
-            }
-
+            Vnodes_ouptput_single_PID(f, fd_path,fd_entry);
             }
         else{
             int count = 0;
