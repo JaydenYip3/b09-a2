@@ -30,12 +30,6 @@ Node * createNode(int fd){
         exit(1);
     }
     new_node->fd = fd;
-    struct stat fd_stat;
-    if (fstat(fd, &fd_stat) < 0) {
-        //fprintf(stderr, "Error retrieving inode");
-        return NULL;
-    }
-    new_node->inode = (int)fd_stat.st_ino;
     new_node->next = NULL;
 
     return new_node;
@@ -54,14 +48,29 @@ int contains_fd(Node *head, int fd){
     return 0;
 }
 
-Node* add_fd(Node *head, int fd){
+Node* add_fd(Node *head, DIR *fd_path, int fd){
     if (contains_fd(head, fd)){
         return head;
     }
     Node *new_node = createNode(fd);
     if (!new_node){
+        printf(stderr, "Memoroy allocation failed");
+        exit(1);
+    }
+
+    new_node->fd = fd;
+
+    struct stat fd_stat;
+
+
+    int dir_fd = dirfd(fd_path);
+    if (fstat(dir_fd, &fd_stat) < 0) {
+        free(new_node);
         return head;
     }
+    new_node->inode = (int)fd_stat.st_ino;
+    new_node->next = NULL;
+
     if (head ==NULL || head->fd > fd){
         new_node->next = head;
         return new_node;
@@ -341,7 +350,7 @@ void table_output(struct Flags* f){
                             continue;
                         }
                         int fd = (int) strtol(fd_entry->d_name, NULL, 10);
-                        head = add_fd(head, fd);
+                        head = add_fd(head, fd_path, fd);
                     }
                     closedir(fd_path);
                 }
