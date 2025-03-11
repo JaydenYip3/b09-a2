@@ -601,7 +601,7 @@ void threshold_output(Flags* f,DIR* fd_path, DIR* proc_dir, struct dirent *fd_en
             //checks if has access to the PID
             char file_path[256];
             snprintf(file_path, sizeof(file_path), "/proc/%s/fd", PID);
-            fd_path = opendir(fd_path);
+            fd_path = opendir(file_path);
             //path of the current PID's file directory
 
             if (!fd_path) {
