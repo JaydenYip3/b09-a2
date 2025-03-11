@@ -181,7 +181,7 @@ void per_process_output_multiple_PID(DIR* fd_path, DIR* proc_dir, struct dirent 
         char PID[20];
         snprintf(PID, sizeof(PID), "%.9s", entry->d_name);
 
-        if (!isdigit(PID)){
+        if (!isdigit(PID[0])){
             //PIDs only contain numbers
             continue;
         }
@@ -272,7 +272,7 @@ void system_Wide_output_multiple_PID(DIR* fd_path, DIR* proc_dir, struct dirent 
         snprintf(PID, sizeof(PID), "%.9s", entry->d_name);
         //gets the PID
 
-        if (!isdigit(PID)){
+        if (!isdigit(PID[0])){
             // PIDs can only be digits
             continue;
         }
@@ -370,7 +370,7 @@ void Vnodes_output_multiple_PID(DIR* fd_path, DIR* proc_dir, struct dirent *fd_e
         snprintf(PID, sizeof(PID), "%.9s", entry->d_name);
         //gets the PID
 
-        if (!isdigit(PID)){
+        if (!isdigit(PID[0])){
             // PIDs can only be digits
             continue;
         }
@@ -477,7 +477,7 @@ void composite_output_multiple_PID(DIR* fd_path, DIR* proc_dir, struct dirent *f
         char PID[20];
         snprintf(PID, sizeof(PID), "%.9s", entry->d_name);
          //gets the PID
-        if (!isdigit(PID)){// PIDs can only be digits
+        if (!isdigit(PID[0])){// PIDs can only be digits
             continue;
         }
 
@@ -544,7 +544,7 @@ void summary_output( DIR* fd_path, DIR* proc_dir, struct dirent *fd_entry, struc
         snprintf(PID, sizeof(PID), "%.9s", entry->d_name);
         //gets the PID
 
-        if (!isdigit(PID)) {
+        if (!isdigit(PID[0])) {
             // PIDs can only be digits
             continue;
         }
@@ -592,7 +592,7 @@ void threshold_output(Flags* f,DIR* fd_path, DIR* proc_dir, struct dirent *fd_en
         char PID[20];
         snprintf(PID, sizeof(PID), "%.9s", entry->d_name);
         //gets the PID
-        if (!isdigit(PID)) {
+        if (!isdigit(PID[0])) {
             // PIDs can only be digits
             continue;
         }
