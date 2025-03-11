@@ -167,16 +167,16 @@ void table_output(struct Flags* f){
 
     }
     if (f->system_wide){
-        if (fd_path) {
-            rewinddir(fd_path);
-        }
+
         if (proc_dir) {
-            closedir(proc_dir);
+            rewinddir(proc_dir);
         }
-        proc_dir = opendir("/proc");
         printf("         PID     FD      Filename\n");
         printf("        ========================================\n");
         if (f->PID){
+            if (fd_path) {
+            rewinddir(fd_path);
+        }
             while ((fd_entry = readdir(fd_path))  != NULL){
                 if (strcmp(fd_entry->d_name, ".") == 0 || strcmp(fd_entry->d_name, "..") == 0) {
                     continue;
@@ -238,21 +238,18 @@ void table_output(struct Flags* f){
         printf("        ========================================\n\n");
     }
     if (f->Vnodes) {
-        if (fd_path) {
-            rewinddir(fd_path);
-        }
-        else{
 
-        }
         if (proc_dir) {
-            closedir(proc_dir);
+            rewinddir(proc_dir);
         }
-        proc_dir = opendir("/proc");
 
         printf("         FD            Inode\n");
         printf("        ========================================\n");
 
         if (f->PID) {
+            if (fd_path) {
+                rewinddir(fd_path);
+            }
             while ((fd_entry = readdir(fd_path)) != NULL) {
                 if (strcmp(fd_entry->d_name, ".") == 0 || strcmp(fd_entry->d_name, "..") == 0) {
                     continue;
