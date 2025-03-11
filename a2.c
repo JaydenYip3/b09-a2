@@ -333,7 +333,6 @@ void table_output(struct Flags* f){
             }
             free_fd(head);
         }
-    }
         else{
             Node *head = NULL;
             while ((entry = readdir(proc_dir))){
@@ -356,7 +355,7 @@ void table_output(struct Flags* f){
                             continue;
                         }
                         int fd = (int) strtol(fd_entry->d_name, NULL, 10);
-                        head = add_fd(head, fd);
+                        head = add_fd(head, fd, file_path);
                     }
                     closedir(fd_path);
                 }
