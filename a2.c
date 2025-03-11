@@ -53,6 +53,10 @@ void parse_args(struct Flags* f, int argc, char** argv){
         if (f->PID){
             strncpy(f->PID, argv[index],len );
             f->PID[len] = '\0';
+            if (argc == 2){
+                f->composite = 1;
+                return;
+            }
         }
         else{
             fprintf(stderr, "Error allocating memory for PID arguement.");
@@ -77,6 +81,7 @@ void parse_args(struct Flags* f, int argc, char** argv){
     for (; index < argc; index++){
         if (strcmp(argv[index], "--per-process") == 0){
             f->per_process = 1;
+            if
         }
         else if (strcmp(argv[index], "--systemWide") == 0){
             f->system_wide = 1;
