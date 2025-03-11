@@ -96,6 +96,10 @@ void parse_args(struct Flags* f, int argc, char** argv){
                 exit(1);
             }
             f->threshold_int =  (int)strtol(argv[index]+ 12, NULL, 10);
+            if (f->threshold_int <= 0){
+                fprintf(stderr, "Please pick a threshold strictly greater than 0.");
+                exit(1);
+            }
         }
     }
 }
