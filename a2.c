@@ -221,6 +221,7 @@ void table_output(struct Flags* f){
                             printf("%.7s %s %s\n", PID, fd_entry->d_name, fd_filename);
                         }
                     }
+                    closedir(fd_path);
                 }
 
 
@@ -228,6 +229,9 @@ void table_output(struct Flags* f){
         }
     }
     if (f->Vnodes) {
+        if (fd_path) {
+            rewinddir(fd_path);
+        }
         if (proc_dir) {
             rewinddir(proc_dir);
         }
