@@ -8,7 +8,7 @@
 #include <fcntl.h>
 #include <ctype.h>
 
-typedef struct Flags {
+typedef struct Flags { // Struct for holding flags and terminal arguements
         int per_process;
         int system_wide;
         int Vnodes;
@@ -20,18 +20,33 @@ typedef struct Flags {
 
 
 int owns_file(char *PID){
+    // descry: This function determines if the following PID is accessible by the user.
+    // PID: Process identity value , type string.
+    // returning: This function returns true or false if the PID is accessible by the user.
+
     char path[64];
     struct stat st;
+    //intialization
 
     snprintf(path, sizeof(path), "/proc/%s", PID);
+    //creates the path directory to the PID
 
     if (stat(path, &st) != 0){
         return 0;
+        //checks if the PID exists
     }
     return st.st_uid == getuid();
+    //returns true if the user owns the process
 
 }
+
 void parse_args(Flags* f, int argc, char** argv){
+    // descry: Determines the state of each flag and argument in Flags f, this will determine the outputs that will be made
+    // f: Custom struct made to hold true or false values and strings, type Flags.
+    // argc: The number of arguments in the terminal input, type int.
+    // argv: A collection of strings that were inputted from the terminal, type string array.
+    // returning: No return value.
+
     f->per_process = 0;
     f->system_wide = 0;
     f->Vnodes = 0;
@@ -39,37 +54,45 @@ void parse_args(Flags* f, int argc, char** argv){
     f->summary = 0;
     f->threshold_int = 0;
     f->PID = NULL;
+    // Preset to all false and empty
 
     if (argc == 1){
         f->composite = 1;
         return;
+        // default output when no arguments inputted
     }
 
     int index = 1;
+    //starts after the output file
     if (argv[index][0] != '-'){
-
+        //checks if the first is a PID
         int len = strlen(argv[index]);
         f->PID = malloc(len + 1);
-        if (f->PID){
+        //allocating space for the string user inputted
+        if (f->PID){ //check if allocation worked
             strncpy(f->PID, argv[index],len );
             f->PID[len] = '\0';
             if (argc == 2){
                 f->composite = 1;
                 return;
+                //if only two inputs are the output file and PID then default output
             }
         }
         else{
             fprintf(stderr, "Error allocating memory for PID arguement.");
             exit(1);
         }
+
         char file_path[256];
         snprintf(file_path, sizeof(file_path), "/proc/%s/fd", f->PID);
         DIR *fd_path = opendir(file_path);
+        //For the input PID for its directory
         if (fd_path == NULL){
             if (!owns_file(f->PID)){
                 fprintf(stderr, "You do not have permissions for PID:  %s.\n", f->PID);
                 free(f->PID);
                 exit(1);
+                //checks if PID exits or if has permissions
             }
             fprintf( stderr, "No such process with PID: %s.\n", f->PID);
             free(f->PID);
@@ -81,23 +104,30 @@ void parse_args(Flags* f, int argc, char** argv){
     for (; index < argc; index++){
         if (strcmp(argv[index], "--per-process") == 0){
             f->per_process = 1;
+            // sets true for per proces output
         }
         else if (strcmp(argv[index], "--systemWide") == 0){
             f->system_wide = 1;
+            // sets true for system wide output
         }
         else if (strcmp(argv[index], "--Vnodes") == 0){
             f->Vnodes = 1;
+            // sets true for Vnodes output
         }
         else if (strcmp(argv[index], "--composite") == 0){
             f->composite = 1;
+            // sets true for composite output
         }
         else if (strcmp(argv[index], "--summary") == 0){
             f->summary = 1;
+            // sets true for summary output
         }
         else if (strncmp(argv[index], "--threshold=", 12) == 0){
+            //checks if --threshold is the first 12 characters
             if (strlen(argv[index]) == 12){
                 fprintf(stderr, "Error no value present after --threshold=X");
                 exit(1);
+                //if there is no X value
             }
             f->threshold_int =  (int)strtol(argv[index]+ 12, NULL, 10);
             if (f->threshold_int <= 0){
@@ -106,7 +136,7 @@ void parse_args(Flags* f, int argc, char** argv){
             }
         }
         else{
-            fprintf(stderr, "There is an unrecognized flag or arguement inputted.");
+            fprintf(stderr, "There is an unrecognized flag or arguement inputted. \n");
             exit(1);
         }
     }
@@ -442,7 +472,7 @@ void table_output(struct Flags* f){
         snprintf(file_path, sizeof(file_path), "/proc/%s/fd", f->PID);
         fd_path = opendir(file_path);
         if (!fd_path){
-            fprintf(stderr, "Erorin opening path: %s", file_path);
+            fprintf(stderr, "Error in opening path: %s\n", file_path);
             exit(1);
         }
     }
