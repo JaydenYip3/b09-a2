@@ -163,7 +163,7 @@ void table_output(struct Flags* f){
 
             }
         }
-        printf("        ============\n");
+        printf("        ============\n\n");
 
     }
     if (f->system_wide){
@@ -231,7 +231,7 @@ void table_output(struct Flags* f){
 
             }
         }
-        printf("========================================\n");
+        printf("        ========================================\n\n");
     }
     if (f->Vnodes) {
         if (fd_path) {
@@ -241,8 +241,8 @@ void table_output(struct Flags* f){
             rewinddir(proc_dir);
         }
 
-        printf("FD            Inode\n");
-        printf("========================================\n");
+        printf("         FD            Inode\n");
+        printf("        ========================================\n");
 
         if (f->PID) {
             while ((fd_entry = readdir(fd_path)) != NULL) {
@@ -261,7 +261,7 @@ void table_output(struct Flags* f){
                 if (ret < 0) {
                     continue;
                 }
-                printf("%-11d %ld\n", fd, file_stat.st_ino);
+                printf("         %-11d %ld\n", fd, file_stat.st_ino);
             }
 
             }
@@ -302,6 +302,7 @@ void table_output(struct Flags* f){
                     closedir(fd_path);
                 }
             }
+            printf("        ========================================\n\n");
          }
     }
     if (f->composite){
