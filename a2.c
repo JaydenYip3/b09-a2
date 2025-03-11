@@ -81,7 +81,6 @@ void parse_args(struct Flags* f, int argc, char** argv){
     for (; index < argc; index++){
         if (strcmp(argv[index], "--per-process") == 0){
             f->per_process = 1;
-            if
         }
         else if (strcmp(argv[index], "--systemWide") == 0){
             f->system_wide = 1;
