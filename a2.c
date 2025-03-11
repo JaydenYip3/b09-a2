@@ -130,10 +130,17 @@ void parse_args(Flags* f, int argc, char** argv){
                 //if there is no X value
             }
             f->threshold_int =  (int)strtol(argv[index]+ 12, NULL, 10);
+            if (!isdigit(f->threshold_int)){
+                fprintf(stderr, "You are only allowed to put an int as a input for threshold.\n");
+                exit(1);
+            }
+
             if (f->threshold_int <= 0){
                 fprintf(stderr, "Please pick a threshold strictly greater than 0.\n");
                 exit(1);
             }
+
+
         }
         else{
             fprintf(stderr, "There is an unrecognized flag or arguement inputted. \n");
