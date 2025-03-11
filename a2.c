@@ -343,7 +343,7 @@ void table_output(struct Flags* f){
                 }
 
 
-                printf("         %-7.7s %-7.7s %s       \n", f->PID, fd_entry->d_name, fd_filename, file_stat.st_ino);
+                printf("         %-7.7s %-7.7s %s       %ld\n", f->PID, fd_entry->d_name, fd_filename, file_stat.st_ino);
             }
         }
 
