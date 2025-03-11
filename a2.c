@@ -440,9 +440,46 @@ void table_output(struct Flags* f){
                 printf("%.7s (%d),   ", PID, fd_count);
             }
         }
+        printf("\n\n");
     }
     if (f->threshold_int){
+        if (proc_dir) {
+            rewinddir(proc_dir);
+        }
 
+        printf("#Offending processes\n");
+        while ((entry = readdir(proc_dir)) != NULL){
+            char PID[20];
+            snprintf(PID, sizeof(PID), "%.9s", entry->d_name);
+
+            if (!isdigit(PID[0])) {
+                continue;
+            }
+
+            if (owns_file(PID)) {
+                char file_path[256];
+                snprintf(file_path, sizeof(file_path), "/proc/%s/fd", PID);
+                DIR *fd_dir = opendir(file_path);
+
+                if (!fd_dir) {
+                    continue;
+                }
+
+                int fd_count = 0;
+                while ((fd_entry = readdir(fd_dir)) != NULL) {
+                    if (strcmp(fd_entry->d_name, ".") == 0 || strcmp(fd_entry->d_name, "..") == 0) {
+                        continue;
+                    }
+                    fd_count++;
+                }
+                closedir(fd_dir);
+                if (fd_count >= f->threshold_int){
+                    printf("%.7s (%d),   ", PID, fd_count);
+                }
+
+            }
+        }
+        printf("\n\n");
     }
 
     return;
