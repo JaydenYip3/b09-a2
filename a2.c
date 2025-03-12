@@ -635,9 +635,9 @@ void table_output(struct Flags* f){
     // returning: No return value.
 
     //printf("%s", f->PID);
-    struct dirent *entry;
-    struct dirent *fd_entry;
-    DIR *fd_path;
+    struct dirent *entry = NULL;
+    struct dirent *fd_entry = NULL;
+    DIR *fd_path = NULL;
     DIR *proc_dir = opendir("/proc");
     //specific directories and paths used in the modular methods
 
