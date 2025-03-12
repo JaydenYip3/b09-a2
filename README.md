@@ -2,52 +2,95 @@
 
 # 1. Metadata:
 Author: Jayden
+
 Date: March 11, 2025
 
 
-# Features
-- Real-Time System Monitoring
-    - CPU Usage: Percent of the CPU used
-    - Memory USage: Amount of RAM used (in GB)
-- Configurable Sampling
-    - Number of samples
-    - Time of delay between samples
-- Cores Info
-    - Number of cores
-    - Max. frequency of cores
-- Graphical Interface
-    - ASCII bar graph for both memory and CPU
-    samples
+# 2. Introduction:
+This is a simple C program that simply keeps track of open files, assignation of file descriptors, and process used by the OS.
 
-# Prerequisites
-- C Compiler (e.g., gcc)
-- Compatible system (linux)
+# 3. Desiption of how you solve/approach the problem
+I solved this my solving them sequentially. After all the setup of the flags and inputs (which was similar to A1) I started with per-process. I first had to do research on understanding the /proc/__/fd/ format. I played around in a linux system using ls -l /proc and such to visualize what I was actually doing. After that it was a matter of applying to what I saw. I used specific tools in C such as DIR and dirent to help navigate the directories and point to the items in the directory. After the per process it was pretty similar throughout where you have to either one set /proc/PID/fd/ to be a constant PID or a dynamic one where you iterate through, so the rest of the flags were similar in that manner.
 
-# Usage
-After compiling:
->gcc -lm -std=c99 -Werror -Wall -o myMonitoringTool a1.c
+# 4. Implementation
+I implemented my code in modules, where each module (function) has a singular responsiblity (for the most part).
+-  >int owns_file(char *PID)
 
-Note: Its important for -lm to be there as it supports for functions such as ceil()... etc
+This function tests to see if the current user has permission or access to the file and uses stat to test if PID exits.
+-  >parse_args(Flags* f, int argc, char** argv)
 
-**CLA Syntax**
->./myMonitoringTool [samples [tdelay]] [--memory] [--cpu] [--cores] [--samples=N] [--tdelay=T]
+This function takes in the arguments and saves their inputs in the Flags struct so it can be referenced later for printing and this uses DIR to read the directory path and test if PID leads to a valid directory path.
+- >void per_process_output_single_PID(Flags* f, DIR *fd_path, struct dirent *fd_entry)
 
-If no arguements are passed then all the information is present with default
-values of samples = 20 and tdelay = 500000 microseconds (0.5 seconds)
+This function draws the content inside the table, it uses DIR to get to a directory and dirent to point at each item in the directory.
+- >void per_process_output_multiple_PID(DIR* fd_path, DIR* proc_dir, struct dirent *fd_entry, struct dirent *entry)
 
-# Paramters
-1. ><'samples'>
-    - Optional Integer defualt 20
-    - Represents how many times the data will be sampled
-2. ><'tdelay'>
-    - Optional Integer default 500000
-    - Respresents the delay between the samples
-3. **Options**
-    - '--memory': Shows memory usage graph
-    - '--cpu': Shows CPU usage graph
-    - '--cores': Shows number of cores and max frequency
-    - '--samples=N' Custom number of samples
-    - '--tdelay=T' Custom delay between samples
+This function outputs for the all running processes, it uses DIR and dirent to each directory of all PIDs and their /proc/PID/fd/ and it uses dirent to point at the PIDs in /proc and FDs in /proc/PID/fd/.
+- >void system_Wide_output_single_PID(Flags* f,DIR* fd_path, struct dirent *fd_entry)
+
+This function uses both DIR and dirent similar to per-process for a single PID however it includes
+readlink to read the directory link.
+
+- >void system_Wide_output_multiple_PID(DIR* fd_path, DIR* proc_dir, struct dirent *fd_entry, struct dirent *entry)
+
+This function again uses both DIR and dirent in a similar fashion to per_process_output_multiple_PID but also uses readlink() to help extract the path of the current PID,FD.
+
+- >void Vnodes_ouptput_single_PID(Flags* f,DIR* fd_path, struct dirent *fd_entry)
+
+This function uses the DIR and dirent the same way as the previous but also uses fstatat to retrieve the metadata of the path, ultimately to find the inode of the fd.
+
+- >void Vnodes_output_multiple_PID(DIR* fd_path, DIR* proc_dir, struct dirent *fd_entry, struct dirent *entry)
+
+This function behaves similarily with the multiple_PID processes but also uses fstatat to extract the file metadata to get the inode.
+
+- >void composite_output_single_PID(Flags* f,DIR* fd_path, struct dirent *fd_entry)
+
+This behaves similar to all the combined single_PID outputs together and does not add any new feature or usage than the code prior to it.
+
+- >void composite_output_multiple_PID(DIR* fd_path, DIR* proc_dir, struct dirent *fd_entry, struct dirent *entry)
+
+This code again is similar to all the combined multiple_PID outputs together and has no new features within it.
+
+- >void summary_output( DIR* fd_path, DIR* proc_dir, struct dirent *fd_entry, struct dirent *entry)
+
+This function essentially goes to all PIDs and starts counting their FDs by reading each entry and prints it out.
+
+- > void threshold_output(Flags* f,DIR* fd_path, DIR* proc_dir, struct dirent *fd_entry, struct dirent *entry)
+
+This function does a similar job to the summary_output but before printing it has a check if the number of FDs is greater than the threshold=X, then it prints with it is **STRICTLY GREATER THAN X**.
+
+- > void table_output(struct Flags* f)
+
+This function just simply connects the pieces together, that being all the output function and it intializes the paths of /proc and the path of /proc/PID/fd if PID is given.
+
+- > int main(int argc, char** argv)
+
+This function just simply defines the Flags struct and calls functions parse_args and table_output.
+
+
+
+# 5. Flow Chart
+![Flow Chart](./flowchart.png)
+
+# 6. Compiling Code
+To compile the code you should run:
+> gcc -Werror -Wall -std=c99 -D_GNU_SOURCE  -o output a2.c
+
+Note it is vital for -D_GNU_SOURCE because it allows readlink to work.
+
+To run the code, there are optional flags and arguments:
+> ./output [PID] [--per-process] [--systemWide] [--Vnodes] [--composite] [--summary] [--threshold=X]
+
+Note it is mandatory if you want a specific PID then the PID must be the first argument.
+
+All the other tags orders should not matter.
+
+If no tag is present then it will default to composite.
+
+The X in threshold should be an integer value, else it will exit or get truncated, and X is inclusive.
+
+# 7. Expected Results
+
 
 # How it works:
 1. **Parsing Arguments**
