@@ -90,29 +90,61 @@ If no tag is present then it will default to composite.
 The X in threshold should be an integer value, else it will exit or get truncated, and X is inclusive.
 
 # 7. Expected Results
+![example](./example1.png)
+
+This should be the expected output of --per-process and the other flags (excluding --summary and --threshold=X)should share a similar output of a table structured like this but with different lables.
+
+![example](./example2.png)
+
+This is the output of summary and threshold tags, it is represented by PID   (# of FDs).
 
 
-# How it works:
-1. **Parsing Arguments**
-    - The *parse_agruements()* function determines the user input from the execution and
-    saves it all to a struct
-2. **Data Collection**
-    - The *get_cpu_times()* functions reads from /proc/stat to get CPU usage over tiem
-    - The *get_memory_usage()* function retrieves total and used memory from the system.
-    - The *get_core_info()* function gets the number of CPU cores and their max frequency.
-3. **Graphs and Displays**
-    - Memory Graph: The *print_memory_graph()* function generates an ASCII representation of memory usage over time.
-        - **IMPORTANT**: The graph's y-axis is seperated by 10 segments where each segment represents a **percentage range**, that benig the very bottom one being from 0-10% all the way to the very top one being 90-100%
-    - CPU Graph: The *print_cpu_graph()* function creates an ASCII visualization of CPU usage over the sampled time period.
-        - The graph's y-axis is seperated by 12 segments where each represent a portion of the memory. With the bottom being 0 (**not the x-axis**) and top being the system rated memory
-    - Cores Grid: The *print_core_info()* function formats and displays the number of cores and their frequencies in a structured format.
-4. **Timing**
-    - The *custom_sleep()* function implements a custom way to delay sampling
+# 8. Test cases
+A significant testcase I used was
+>./output --per-process
 
+Then I would take the last process of the PID table and use
 
+>./output last_process --per-process
 
+This will say that the process is unreachable because the last process of the first run no longer is a current process so it doesn't exists.
 
+I also tested
+>./output --per-process --Vnodes
 
-# Author
-**Jayden Yip**
-February 7, 2025
+This helped show if my DIR and dirent were resetting, and to show if it could read from multiple directories multiple times.
+
+./output --systemWide --Vnodes
+
+This also helped show if my DIR and dirent were resetting, and to show if it could read from multiple directories multiple times. This is different because of how the code is structured.
+
+>./output --threshold=100000
+
+This should show nothing in most cases.
+
+>./output --threshold=25
+
+This should show some cases
+
+Obviously running all the flags independently is another few test cases as well.
+
+# 9. Disclaimers
+
+As stated previously with the testcases of the last test case of all PIDs from --per-process, the last PID does not work if you target it independently, this is presumed to be because it is no longer a process.
+
+Another disclaimer is length of any specific FDs, PIDs (probably not PID) or such being too long, this will break the code and make the format off. It is most likely that your files and such will not surpass this limit though.
+
+Another reminder that threshold=0 is invalid as a feature.
+
+Code may fail if there are too many PIDs or if the file path is greater than 256 characters. It will also fail if the filename is greater than 1024. It depends on which part as systemWide is expected to hold larger strings than --per-process (/proc/PID/fd length less than 256).
+
+# 10. References
+https://stackoverflow.com/questions/52448530/stat-alternative-for-long-file-paths
+
+https://linux.die.net/man/2/fstatat
+
+https://www.gnu.org/software/libc/manual/html_node/Opening-a-Directory.html
+
+https://pubs.opengroup.org/onlinepubs/7908799/xsh/dirent.h.html
+
+https://pubs.opengroup.org/onlinepubs/009696699/functions/readlink.html
