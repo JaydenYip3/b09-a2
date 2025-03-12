@@ -1,6 +1,6 @@
 CC = gcc
 CFLAGS = -Wall -Werror -std=c99 -D_GNU_SOURCE
-TARGET = showFDtables
+TARGET = output
 SRCS = a2.c
 
 all:
