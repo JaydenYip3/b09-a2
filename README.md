@@ -89,6 +89,8 @@ If no tag is present then it will default to composite.
 
 The X in threshold should be an integer value, else it will exit or get truncated, and X is inclusive.
 
+It is also important to note that --summary and --threshold=X are not affected by if there is a PID or not, regardless it will output for all PIDs.
+
 # 7. Expected Results
 ![example](./example1.png)
 
