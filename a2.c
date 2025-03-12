@@ -175,6 +175,7 @@ void per_process_output_multiple_PID(DIR* fd_path, DIR* proc_dir, struct dirent 
     // returning: No return value.
 
     int count = 0;
+    char last_PID[20] = "";
     // counter for the ouptput format
     while ((entry = readdir(proc_dir))){
         // iterates through each PID in the /proc/
@@ -187,6 +188,7 @@ void per_process_output_multiple_PID(DIR* fd_path, DIR* proc_dir, struct dirent 
         }
 
         if (owns_file(PID)){
+            stpcpy(last_PID, PID);
             //checks if has access to the PID
             char file_path[256];
             snprintf(file_path, sizeof(file_path), "/proc/%s/fd", PID);
@@ -213,6 +215,7 @@ void per_process_output_multiple_PID(DIR* fd_path, DIR* proc_dir, struct dirent 
 
 
     }
+    printf("Last: %s", last_PID );
 
 }
 void system_Wide_output_single_PID(Flags* f,DIR* fd_path, struct dirent *fd_entry){
