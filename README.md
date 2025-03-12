@@ -101,6 +101,18 @@ This should be the expected output of --per-process and the other flags (excludi
 This is the output of summary and threshold tags, it is represented by PID   (# of FDs).
 
 
+>make
+
+This will automatically run the redundant compile line:
+
+>gcc -Werror -Wall -std=c99 -D_GNU_SOURCE  -o output a2.c
+
+And to remove the ouptput file you can use
+
+>make clean
+
+This will get rid of the output file.
+
 # 8. Test cases
 A significant testcase I used was
 >./output --per-process
